@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Budget Maison</title>
+<title>Famille</title>
 <meta name="robots" content="noindex, nofollow">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Budget">
+<meta name="apple-mobile-web-app-title" content="Famille">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#f4f6f5">
 <link rel="manifest" href="manifest.webmanifest">
@@ -16,10 +16,10 @@
 <style>
   :root {
     --fond: #f4f6f5;
-    --surface: rgba(255,255,255,.78);
+    --surface: rgba(255,255,255,.72);
     --verre: rgba(255,255,255,.62);
     --flou: blur(20px) saturate(160%);
-    --lisere: rgba(39,50,46,.055);
+    --lisere: rgba(39,50,46,.045);
     --texte: #2a3431;
     --discret: #929b97;
     --fait: #bcc4c0;
@@ -30,13 +30,27 @@
     --accent-doux: rgba(181,221,207,.35);
     --rentree: #44946d;
     --alerte: #d0665d;
-    --ombre: 0 1px 2px rgba(39,50,46,.03), 0 4px 16px rgba(39,50,46,.035);
+    --ombre: 0 1px 2px rgba(39,50,46,.025), 0 3px 14px rgba(39,50,46,.03);
+    --accent-texte: #2b5e50;       /* texte sur fond pastel */
+    --coche-faite: #d0d8d4;
+    --bandeau-texte: #557568;
     --rayon: 20px;
     color-scheme: light;
   }
+  /* Espace Famille : vieux jaune pastel */
+  :root[data-zone="famille"] {
+    --fond: #f7f5ee;
+    --accent: #9c7a22;
+    --accent-pastel: #eedd9c;
+    --accent-doux: rgba(238,221,156,.36);
+    --accent-texte: #6b5313;
+    --coche-faite: #ddd6c2;
+    --bandeau-texte: #7a6527;
+    --fait: #c4bfb1;
+  }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; }
-  html { overscroll-behavior-y: none; background: var(--fond); }
+  html { overscroll-behavior-y: none; background: var(--fond); transition: background-color .5s; }
   body {
     background: transparent; color: var(--texte);
     font: 15px/1.45 -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Roboto, sans-serif;
@@ -44,8 +58,20 @@
     padding-bottom: calc(100px + env(safe-area-inset-bottom));
   }
   /* Fond pastel très diffus */
+  body::before, body::after {
+    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; transition: opacity .6s;
+  }
+  body::after {
+    opacity: 0;
+    background:
+      radial-gradient(60% 45% at 8% 0%, rgba(246,232,182,.55), transparent 70%),
+      radial-gradient(55% 40% at 100% 15%, rgba(250,224,206,.42), transparent 70%),
+      radial-gradient(60% 45% at 90% 100%, rgba(232,238,214,.40), transparent 70%),
+      var(--fond);
+  }
+  :root[data-zone="famille"] body::before { opacity: 0; }
+  :root[data-zone="famille"] body::after { opacity: 1; }
   body::before {
-    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
     background:
       radial-gradient(60% 45% at 8% 0%, rgba(190,230,214,.42), transparent 70%),
       radial-gradient(55% 40% at 100% 15%, rgba(212,226,246,.40), transparent 70%),
@@ -61,7 +87,7 @@
     max-width: 620px; margin: 0 auto;
     padding: 0 max(18px, env(safe-area-inset-right)) 0 max(18px, env(safe-area-inset-left));
   }
-  svg { stroke-width: 1.6; }
+  svg { stroke-width: 1.5; }
 
   /* Surfaces : blanc léger, liseré fin, ombre à peine visible (le flou est réservé aux barres et aux fenêtres) */
   .tuile, .liste, .carte, .rond, .puce {
@@ -75,7 +101,7 @@
     background: rgba(244,246,245,.7);
     -webkit-backdrop-filter: var(--flou); backdrop-filter: var(--flou);
   }
-  header.haut h1 { font-size: 16px; font-weight: 600; margin: 0; letter-spacing: -.01em; }
+  header.haut h1 { font-size: 15.5px; font-weight: 600; margin: 0; letter-spacing: -.01em; }
   #etat {
     position: absolute; right: 18px; bottom: 12px; font-size: 11.5px; color: var(--discret);
     border: 0; background: none; padding: 0;
@@ -103,14 +129,14 @@
     transition: flex-grow .35s cubic-bezier(.3,.7,.2,1), background .25s, color .25s, font-size .3s;
   }
   nav.onglets button span { max-width: 100%; padding-top: 1px; }
-  nav.onglets button svg { width: 20px; height: 20px; stroke-width: 1.5; transition: transform .35s cubic-bezier(.3,.7,.2,1); }
+  nav.onglets button svg { width: 20px; height: 20px; stroke-width: 1.4; transition: transform .35s cubic-bezier(.3,.7,.2,1); }
   nav.onglets button.actif {
     flex-grow: 1.8; color: var(--accent); font-weight: 600; font-size: 10.5px; background: var(--accent-doux);
   }
   nav.onglets button.actif svg { transform: scale(1.15); }
 
   .barre-mois { display: flex; align-items: center; justify-content: space-between; margin: 8px 0 20px; }
-  .barre-mois h2 { font-size: 22px; font-weight: 600; margin: 0; letter-spacing: -.02em; text-transform: capitalize; }
+  .barre-mois h2 { font-size: 21px; font-weight: 600; margin: 0; letter-spacing: -.02em; text-transform: capitalize; }
   .rond { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; color: var(--accent); }
   .rond svg { width: 18px; height: 18px; stroke-width: 2; }
   .rond:disabled { opacity: .3; box-shadow: none; }
@@ -118,7 +144,7 @@
   /* Mois clôturé */
   .cloture {
     display: flex; align-items: center; gap: 8px; margin: -6px 0 16px; padding: 9px 14px;
-    border-radius: 14px; background: var(--accent-doux); color: #557568; font-size: 13px;
+    border-radius: 14px; background: var(--accent-doux); color: var(--bandeau-texte); font-size: 13px;
   }
   .cloture svg { width: 16px; height: 16px; flex: none; }
   .cloture span { flex: 1; }
@@ -139,7 +165,7 @@
   }
   .hero h3 + .virement { border-top: 0; }
   .virement .qui { flex: 1; font-size: 16px; font-weight: 400; }
-  .virement b { font-size: 20px; font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+  .virement b { font-size: 19px; font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
   .virement .coche { border-color: rgba(67,144,122,.35); background: rgba(255,255,255,.5); }
   .virement.fait .coche { background: rgba(255,255,255,.8); border-color: rgba(255,255,255,.9); }
   .virement .coche svg { stroke: #9dbbb0; }
@@ -148,7 +174,7 @@
   .tuiles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px; }
   .tuile { border-radius: var(--rayon); padding: 14px 16px; }
   .tuile span { display: block; font-size: 11.5px; font-weight: 500; color: var(--discret); }
-  .tuile b { display: block; margin-top: 4px; font-size: 18px; font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+  .tuile b { display: block; margin-top: 4px; font-size: 17px; font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
   .negatif { color: var(--alerte); }
   button.tuile { text-align: left; width: 100%; }
 
@@ -160,7 +186,7 @@
     display: grid; place-items: center; min-height: 38px; border-radius: 11px; border: 1px solid var(--bord);
     font-size: 12.5px; font-weight: 500; color: var(--discret); background: rgba(255,255,255,.6);
   }
-  .mois12 input:checked + span { background: var(--accent-pastel); border-color: var(--accent-pastel); color: #2b5e50; }
+  .mois12 input:checked + span { background: var(--accent-pastel); border-color: var(--accent-pastel); color: var(--accent-texte); }
 
   /* Impôts : rubriques d'un enfant et leurs dépenses */
   .rubrique + .rubrique { border-top: 1px solid var(--trait); }
@@ -186,7 +212,7 @@
   /* Listes groupées façon iOS */
   section.bloc { margin-bottom: 28px; }
   section.bloc > h3 {
-    font-size: 11px; margin: 0 0 8px 16px; color: var(--discret); font-weight: 500;
+    font-size: 10.5px; margin: 0 0 8px 16px; color: var(--discret); font-weight: 500;
     text-transform: uppercase; letter-spacing: .07em;
     display: flex; justify-content: space-between; align-items: baseline; padding-right: 16px;
   }
@@ -210,12 +236,12 @@
   .ligne.passee .nom small { color: var(--fait); }
   .ligne.inactive .corps { opacity: .45; }
   .coche {
-    flex: none; width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid rgba(39,50,46,.16);
+    flex: none; width: 21px; height: 21px; border-radius: 50%; border: 1.3px solid rgba(39,50,46,.15);
     background: rgba(255,255,255,.6);
     display: grid; place-items: center; transition: background .15s, border-color .15s;
   }
   .coche svg { width: 13px; height: 13px; stroke: #fff; opacity: 0; transition: opacity .15s; }
-  .passee .coche { background: #d0d8d4; border-color: #d0d8d4; }
+  .passee .coche { background: var(--coche-faite); border-color: var(--coche-faite); }
   .passee .coche svg, .fait .coche svg { opacity: 1; }
   .ajouter {
     width: 100%; border: 0; border-top: 1px solid var(--trait); background: none; color: var(--accent);
@@ -229,7 +255,9 @@
   .carte { border-radius: var(--rayon); padding: 18px; }
   .credit .entete { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
   .credit .entete h4 { margin: 0; font-size: 16px; font-weight: 500; }
-  .credit .entete b { font-size: 18px; font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+  .credit .entete b { font-size: 17px; font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+  .bouton.principal, .puce, .lien, .ajouter, .cloture, nav.onglets button, .rond { transition: background-color .4s, color .4s, border-color .4s; }
+
   /* Compte joint : séparation entre les entrées et les sorties */
   .separateur { height: 7px; background: rgba(39,50,46,.035); border-top: 1px solid var(--trait); border-bottom: 1px solid var(--trait); }
 
@@ -260,6 +288,90 @@
   .recap .lien { justify-self: start; padding-left: 12px; font-size: 14px; }
   .recap-ligne.total { border-top: 1px solid var(--bord); margin-top: 4px; }
   .recap-ligne.total b { font-size: 17px; }
+
+  /* Titre de l'en-tête : sélecteur d'espace */
+  .titre-zone {
+    border: 0; background: none; font: inherit; color: inherit; letter-spacing: inherit;
+    display: inline-flex; align-items: center; gap: 3px; padding: 6px 10px 6px 14px; border-radius: 999px; min-height: 36px;
+  }
+  .titre-zone svg { width: 15px; height: 15px; color: var(--accent); transition: transform .35s cubic-bezier(.2,.85,.25,1), color .4s; }
+  .titre-zone[aria-expanded="true"] svg { transform: rotate(180deg); }
+  .titre-zone:active { background: var(--accent-doux); }
+
+  /* Sélecteur d'espaces : sort de la barre du haut pour venir au milieu */
+  .zones { position: fixed; inset: 0; z-index: 30; }
+  .zones-fond {
+    position: absolute; inset: 0; background: rgba(39,50,46,.10); opacity: 0; transition: opacity .3s;
+    -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px);
+  }
+  .zones-panneau {
+    position: absolute; left: 50%; top: 50%; width: min(340px, calc(100vw - 48px)); padding: 14px 14px 16px;
+    border-radius: 28px; background: rgba(252,252,250,.84); border: 1px solid rgba(255,255,255,.8);
+    -webkit-backdrop-filter: var(--flou); backdrop-filter: var(--flou);
+    box-shadow: 0 20px 60px rgba(39,50,46,.16);
+    transform-origin: 50% 0;
+    transform: translate(-50%, calc(-50vh + env(safe-area-inset-top, 0px) + 10px)) scale(.32, .14);
+    opacity: 0; transition: transform .4s cubic-bezier(.2,.85,.25,1), opacity .22s;
+  }
+  .zones.ouvert .zones-fond { opacity: 1; }
+  .zones.ouvert .zones-panneau { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  .zones-titre { margin: 2px 0 10px; text-align: center; font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--discret); font-weight: 500; }
+  .zone-carte {
+    display: flex; align-items: center; gap: 14px; width: 100%; padding: 13px 14px; margin-top: 8px; text-align: left;
+    border-radius: 20px; border: 1px solid var(--lisere); background: rgba(255,255,255,.7); color: var(--texte);
+  }
+  .zone-carte:active { opacity: .6; }
+  .zone-carte.active[data-z="budget"] { border-color: #b5ddcf; background: rgba(220,240,232,.6); }
+  .zone-carte.active[data-z="famille"] { border-color: #eedd9c; background: rgba(250,242,212,.7); }
+  .zone-icone { flex: none; width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; }
+  .zone-icone svg { width: 22px; height: 22px; }
+  [data-z="budget"] .zone-icone { background: #dcefe7; color: #43907a; }
+  [data-z="famille"] .zone-icone { background: #f7edc6; color: #9c7a22; }
+  .zone-texte b { display: block; font-size: 16px; font-weight: 600; }
+  .zone-texte small { display: block; font-size: 12px; color: var(--discret); margin-top: 1px; }
+
+  /* Espace Famille */
+  .segment { display: flex; gap: 2px; padding: 3px; margin: 10px 0 14px; border-radius: 14px; background: rgba(39,50,46,.045); }
+  .segment button {
+    flex: 1; border: 0; background: none; min-height: 38px; border-radius: 11px; font-weight: 500; color: var(--discret);
+    transition: background-color .25s, color .25s, box-shadow .25s;
+  }
+  .segment button.actif { background: rgba(255,255,255,.95); color: var(--texte); box-shadow: 0 1px 3px rgba(39,50,46,.08); }
+  .puces { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 16px; }
+  .avancement { display: grid; gap: 10px; padding: 14px 16px; margin-bottom: 14px; }
+  .avancement > div:first-child { display: flex; justify-content: space-between; align-items: baseline; }
+  .avancement span { font-size: 12.5px; color: var(--discret); }
+  .avancement b { font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .jauge { height: 5px; border-radius: 3px; background: var(--trait); overflow: hidden; }
+  .jauge i { display: block; height: 100%; border-radius: 3px; background: var(--accent-pastel); transition: width .4s; }
+  section.bloc > h3 .lien { min-height: 0; padding: 0; font-size: 12px; text-transform: none; letter-spacing: 0; }
+  .crayon { color: var(--discret); display: grid; }
+  .crayon svg { width: 16px; height: 16px; }
+  .actions-bas { display: flex; justify-content: center; margin: -10px 0 28px; }
+  .actions-bas .bouton { min-height: 40px; font-size: 14px; }
+  .ajout-rapide { display: flex; gap: 8px; margin: 10px 0 22px; }
+  .ajout-rapide input {
+    flex: 1; min-width: 0; padding: 11px 14px; border: 1px solid var(--bord); border-radius: 13px;
+    background: rgba(255,255,255,.75); font-size: 16px; -webkit-appearance: none; appearance: none;
+  }
+  .ajout-rapide input:focus { outline: 2px solid var(--accent-pastel); outline-offset: -1px; }
+  .ajout-rapide .bouton { width: 46px; padding: 0; font-size: 20px; font-weight: 400; }
+  .pastille { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--fait); }
+  .pastille.ok { background: #a9d4bf; }
+  .pastille.bientot { background: #e6c25e; }
+  .pastille.retard { background: var(--alerte); }
+  .quand { font-size: 12px; color: var(--discret); text-align: right; max-width: 42%; line-height: 1.3; }
+  .nom.long { white-space: normal; }
+  .nom.long small { display: block; margin: 1px 0 0; }
+  #vue > section.bloc:first-child { margin-top: 12px; }
+  .quand.bientot { color: #a07d1c; }
+  .quand.retard { color: var(--alerte); }
+  .vide-val { color: var(--fait); font-weight: 400; }
+  .appel {
+    flex: none; width: 36px; height: 36px; margin-right: 10px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--accent-doux); color: var(--accent);
+  }
+  .appel svg { width: 17px; height: 17px; }
 
   /* Graphique des dépenses */
   .tuile.ouvre span::after { content: " ›"; color: var(--accent); }
@@ -306,7 +418,7 @@
 
   .annees { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 20px; }
   .puce { border-radius: 999px; padding: 7px 16px; min-height: 40px; font-weight: 500; }
-  .puce.actif { background: var(--accent-pastel); border-color: var(--accent-pastel); color: #2b5e50; }
+  .puce.actif { background: var(--accent-pastel); border-color: var(--accent-pastel); color: var(--accent-texte); }
 
   /* Écran d'accueil : code familial, messages d'erreur */
   .accueil { max-width: 360px; margin: 11vh auto 0; text-align: center; }
@@ -363,16 +475,33 @@
     .boutons .danger { width: 100%; order: 3; text-align: center; padding-left: 16px; }
   }
   @keyframes monte { from { transform: translateY(40px); opacity: .4; } to { transform: none; opacity: 1; } }
-  @media (prefers-reduced-motion: reduce) { dialog[open] { animation: none; } nav.onglets button, nav.onglets button svg { transition: none; } }
+  @media (prefers-reduced-motion: reduce) { .zones-panneau, .zones-fond, body::before, body::after { transition: none; } dialog[open] { animation: none; } nav.onglets button, nav.onglets button svg { transition: none; } }
 </style>
 </head>
 <body>
 <div class="page">
-  <header class="haut"><h1>Budget Maison</h1><button id="etat" data-action="rafraichir" disabled></button></header>
+  <header class="haut">
+    <h1><button id="titre-zone" class="titre-zone" data-action="zones" aria-haspopup="dialog" aria-expanded="false">
+      <span id="nom-zone">Budget</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10l5 5 5-5"/></svg></button></h1>
+    <button id="etat" data-action="rafraichir" disabled></button></header>
   <main id="vue"></main>
 </div>
 
 <nav class="onglets" id="onglets"></nav>
+
+<!-- Sélecteur d'espaces : sort de la barre du haut et vient au milieu de l'écran -->
+<div id="zones" class="zones" hidden>
+  <div class="zones-fond" data-action="zones-fermer"></div>
+  <div class="zones-panneau" role="dialog" aria-label="Choisir un espace">
+    <p class="zones-titre">Famille</p>
+    <button class="zone-carte" data-action="zone" data-z="budget">
+      <span class="zone-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h14a2 2 0 012 2v9a2 2 0 01-2 2H6a2 2 0 01-2-2V7zM4 7l11-3v3M16 13.5h.01"/></svg></span>
+      <span class="zone-texte"><b>Budget</b><small>Mois, charges, crédits, épargne, impôts</small></span></button>
+    <button class="zone-carte" data-action="zone" data-z="famille">
+      <span class="zone-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7a3 3 0 106 0 3 3 0 00-6 0M4 21v-1a5 5 0 015-5h6a5 5 0 015 5v1"/></svg></span>
+      <span class="zone-texte"><b>Famille</b><small>Départ, courses, tâches, échéances, carnet</small></span></button>
+  </div>
+</div>
 
 <dialog id="fenetre"><form method="dialog" id="formulaire" novalidate></form></dialog>
 
@@ -395,7 +524,6 @@ const stock = {
 // ====== Données et appels au serveur ======
 
 let d = null;                 // dernières données reçues (voir donnees_ dans Code.gs)
-let onglet = 'mois';
 let anneeImpots = null;
 const ouverts = new Set();    // échéanciers dépliés
 
@@ -475,7 +603,7 @@ function demanderCode(message) {
   document.getElementById('onglets').innerHTML = '';
   document.getElementById('vue').innerHTML = `<form class="accueil" id="form-code" novalidate>
     <img src="icone-180.png" alt="">
-    <h2>Budget Maison</h2>
+    <h2>Famille</h2>
     <p class="aide">Saisis le code familial pour accéder au budget. Il ne te sera demandé qu’une fois sur cet appareil.</p>
     <label class="champ"><span>Code familial</span>
       <input name="code" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false"></label>
@@ -663,23 +791,30 @@ const ICONES = {
   droite: '<path d="M9 6l6 6-6 6"/>',
   coche: '<path d="M5 12l4 4 10-10"/>',
   crayon: '<path d="M4 20h4L19 9l-4-4L4 16v4zM14 6l4 4"/>',
-  cadenas: '<path d="M6 11h12v9H6zM8.5 11V8a3.5 3.5 0 017 0v3"/>'
+  cadenas: '<path d="M6 11h12v9H6zM8.5 11V8a3.5 3.5 0 017 0v3"/>',
+  depart: '<path d="M5 8h14v11H5zM9 8V5h6v3M5 13h14"/>',
+  courses: '<path d="M4 5h2l2 10h10l2-7H7M10 19.5h.01M17 19.5h.01"/>',
+  taches: '<path d="M4 5h16v14H4zM8 12l3 3 5-6"/>',
+  echeances: '<path d="M12 3a7 7 0 00-7 7v4l-2 3h18l-2-3v-4a7 7 0 00-7-7zM10 20a2 2 0 004 0"/>',
+  carnet: '<path d="M6 3h12v18H6zM9 3v18M12 8h3M12 12h3"/>',
+  telephone: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2"/>'
 };
 const icone = (n, style) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${style || 1.8}" stroke-linecap="round" stroke-linejoin="round">${ICONES[n]}</svg>`;
 
-const ONGLETS = [['mois', 'Mois'], ['charges', 'Charges'], ['credits', 'Crédits'], ['epargne', 'Épargne'], ['impots', 'Impôts']];
 
 function rendre() {
   if (!d) return;
-  // La barre n'est construite qu'une fois : on change seulement l'onglet actif, pour que l'animation se voie.
+  // La barre n'est reconstruite qu'en changeant d'espace : sinon on change seulement l'onglet actif (animation).
+  const onglets = ZONES[zone].onglets, onglet = ongletParZone[zone];
   const nav = document.getElementById('onglets');
-  if (nav.children.length !== ONGLETS.length) {
-    nav.innerHTML = ONGLETS.map(([k, t]) =>
+  if ([...nav.children].map(b => b.dataset.k).join() !== onglets.map(o => o[0]).join()) {
+    nav.innerHTML = onglets.map(([k, t]) =>
       `<button data-action="onglet" data-k="${k}" class="${k === onglet ? 'actif' : ''}">${icone(k)}<span>${t}</span></button>`).join('');
   } else {
     [...nav.children].forEach(b => b.classList.toggle('actif', b.dataset.k === onglet));
   }
-  const vues = { mois: vueMois, charges: vueCharges, credits: vueCredits, epargne: vueEpargne, impots: vueImpots };
+  const vues = { mois: vueMois, charges: vueCharges, credits: vueCredits, epargne: vueEpargne, impots: vueImpots,
+    depart: vueDepart, courses: vueCourses, taches: vueTaches, echeances: vueEcheances, carnet: vueCarnet };
   document.getElementById('vue').innerHTML = vues[onglet]();
 }
 
@@ -865,6 +1000,7 @@ function ouvrir(def) {
     <div class="boutons">
       ${def.supprimer ? `<button type="button" class="bouton danger" data-action="f-supprimer">${esc(def.libelleSupprimer || 'Supprimer')}</button>` : ''}
       <span class="espace"></span>
+      ${def.action2 ? `<button type="button" class="bouton" data-action="f-action2">${esc(def.action2.libelle)}</button>` : ''}
       <button type="button" class="bouton" data-action="f-annuler">${esc(def.libelleAnnuler || 'Annuler')}</button>
       <button type="submit" class="bouton principal">${esc(def.libelleValider || 'Enregistrer')}</button>
     </div>`;
@@ -1217,14 +1353,326 @@ function proposerCloture(mois) {
   });
 }
 
+// ====== Espaces : Budget (vert) et Famille (jaune) ======
+
+const ZONES = {
+  budget: { nom: 'Budget', fond: '#f4f6f5', onglets: [['mois', 'Mois'], ['charges', 'Charges'], ['credits', 'Crédits'], ['epargne', 'Épargne'], ['impots', 'Impôts']] },
+  famille: { nom: 'Famille', fond: '#f7f5ee', onglets: [['depart', 'Départ'], ['courses', 'Courses'], ['taches', 'Tâches'], ['echeances', 'Échéances'], ['carnet', 'Carnet']] }
+};
+const CLE_ZONE = 'famille:zone';
+let zone = ZONES[stock.lire(CLE_ZONE)] ? stock.lire(CLE_ZONE) : 'budget';
+const ongletParZone = { budget: 'mois', famille: 'depart' };
+
+function appliquerZone() {
+  document.documentElement.dataset.zone = zone;
+  document.getElementById('nom-zone').textContent = ZONES[zone].nom;
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', ZONES[zone].fond);
+}
+
+function ouvrirZones() {
+  const z = document.getElementById('zones');
+  z.querySelectorAll('.zone-carte').forEach(c => c.classList.toggle('active', c.dataset.z === zone));
+  z.hidden = false;
+  void z.offsetWidth;            // force l'état de départ avant l'animation
+  z.classList.add('ouvert');
+  document.getElementById('titre-zone').setAttribute('aria-expanded', 'true');
+}
+function fermerZones() {
+  const z = document.getElementById('zones');
+  if (z.hidden) return;
+  z.classList.remove('ouvert');
+  document.getElementById('titre-zone').setAttribute('aria-expanded', 'false');
+  const fin = () => { if (!z.classList.contains('ouvert')) z.hidden = true; };
+  matchMedia('(prefers-reduced-motion: reduce)').matches ? fin() : setTimeout(fin, 380);
+}
+function choisirZone(z) {
+  if (ZONES[z] && z !== zone) {
+    zone = z;
+    stock.ecrire(CLE_ZONE, z);
+    appliquerZone();
+    rendre();
+    window.scrollTo(0, 0);
+  }
+  fermerZones();
+}
+
+// ====== Famille : outils communs ======
+
+const fam = () => d.famille || [];
+const nouvelIdLocal = () => (window.crypto && crypto.randomUUID ? crypto.randomUUID()
+  : Date.now().toString(36) + Math.random().toString(36).slice(2)).replace(/-/g, '').slice(0, 10);
+const parOrdre = (a, b) => (a.ordre || 0) - (b.ordre || 0) || String(a.titre).localeCompare(b.titre);
+const ordreSuivant = () => fam().reduce((m, x) => Math.max(m, x.ordre || 0), 0) + 1;
+const edition = new Set();       // modules en mode « Modifier »
+let departEnfant = null, departListe = 'Week-end', echeCat = 'Entretien', carnetCat = 'Contacts';
+const LISTES_DEPART = ['Week-end', 'Crèche', 'Vacances'];
+const CATS_ECHEANCES = ['Entretien', 'Santé', 'Papiers', 'Anniversaires'];
+const gens = () => [...new Set(d.personnes.concat(d.enfants))];
+
+/** Ajoute ou modifie un élément de l'espace Famille (affichage immédiat, puis enregistrement). */
+function sauverFamille(objet) {
+  const o = Object.assign({ id: nouvelIdLocal(), ordre: ordreSuivant(), coche: false }, objet);
+  const i = fam().findIndex(x => x.id === o.id);
+  if (i >= 0) d.famille[i] = o; else (d.famille = fam()).push(o);
+  rendre();
+  sauver('Famille', o);
+}
+function effacerFamille(item) {
+  d.famille = fam().filter(x => x.id !== item.id);
+  rendre();
+  effacer('Famille', item.id);
+}
+function basculerFamille(item) {
+  item.coche = !item.coche;
+  rendre();
+  sauver('Famille', item);
+}
+
+const puces = (liste, actif, action) => `<div class="puces">${liste.map(([v, t]) =>
+  `<button class="puce ${v === actif ? 'actif' : ''}" data-action="${action}" data-v="${esc(v)}">${esc(t)}</button>`).join('')}</div>`;
+
+/** Ligne d'une liste à cocher. En mode « Modifier », un toucher ouvre la fiche au lieu de cocher. */
+function ligneCochable(it, module, detail) {
+  const modif = edition.has(module);
+  return `<div class="ligne ${it.coche ? 'passee' : ''}">
+    <button class="corps" data-action="${modif ? 'f-item' : 'f-cocher'}" data-id="${it.id}" aria-pressed="${!!it.coche}">
+      ${modif ? '' : `<span class="coche">${icone('coche', 3)}</span>`}
+      <span class="nom">${esc(it.titre)}${detail ? `<small>${detail}</small>` : ''}</span>
+      ${modif ? `<span class="crayon">${icone('crayon', 1.8)}</span>` : ''}
+    </button></div>`;
+}
+const boutonModifier = module => `<button class="lien" data-action="f-edition" data-v="${module}">${edition.has(module) ? 'Terminé' : 'Modifier'}</button>`;
+
+/** Fiche d'un élément de liste (Départ, Courses, Tâches). */
+function fenetreItem(it, module, defauts) {
+  const champs = [{ k: 'titre', label: module === 'courses' ? 'Article' : module === 'taches' ? 'Tâche' : 'Article', valeur: it ? it.titre : '', obligatoire: true }];
+  if (module === 'depart') champs.push({ k: 'option', label: 'Seulement si besoin', type: 'case', valeur: it ? it.option : false,
+    aide: 'Ne compte pas pour « Tout est prêt » (ex. médicaments).' });
+  if (module === 'taches') champs.push(
+    { k: 'qui', label: 'Qui s’en occupe', type: 'choix', valeur: it ? it.qui : '', options: [['', 'Tout le monde']].concat(d.personnes.map(p => [p, p])) },
+    { k: 'date', label: 'Pour le (facultatif)', type: 'date', valeur: it ? it.date : '' });
+  if (module !== 'courses') champs.push({ k: 'note', label: 'Note', valeur: it ? it.note : '' });
+  ouvrir({
+    titre: it ? it.titre : module === 'taches' ? 'Nouvelle tâche' : 'Nouvel article',
+    champs,
+    supprimer: it ? () => effacerFamille(it) : null,
+    valider: v => sauverFamille(Object.assign({ module }, defauts || {}, it || {}, v))
+  });
+}
+
+// ====== Onglet Départ ======
+
+function vueDepart() {
+  const enfants = d.enfants.length ? d.enfants : ['Enfant'];
+  if (enfants.indexOf(departEnfant) < 0) departEnfant = enfants[0];
+  const autres = [...new Set(fam().filter(f => f.module === 'depart' && f.groupe === departEnfant).map(f => f.liste))]
+    .filter(l => LISTES_DEPART.indexOf(l) < 0);
+  const listes = LISTES_DEPART.concat(autres);
+  if (listes.indexOf(departListe) < 0) departListe = listes[0];
+  const items = fam().filter(f => f.module === 'depart' && f.groupe === departEnfant && f.liste === departListe).sort(parOrdre);
+  const utiles = items.filter(i => !i.option), siBesoin = items.filter(i => i.option);
+  const faits = utiles.filter(i => i.coche).length;
+  const pret = utiles.length > 0 && faits === utiles.length;
+  return `<div class="segment">${enfants.map(e => `<button class="${e === departEnfant ? 'actif' : ''}" data-action="f-enfant" data-v="${esc(e)}">${esc(e)}</button>`).join('')}</div>
+    ${puces(listes.map(l => [l, l]), departListe, 'f-liste')}
+    <div class="carte avancement">
+      <div><span>${esc(departListe)} · ${esc(departEnfant)}</span><b>${faits} / ${utiles.length}</b></div>
+      <div class="jauge"><i style="width:${utiles.length ? Math.round(faits / utiles.length * 100) : 0}%"></i></div>
+    </div>
+    ${pret ? `<div class="cloture">${icone('coche', 2)}<span>Tout est prêt pour ${esc(departEnfant)} !</span></div>` : ''}
+    <section class="bloc"><h3>À prendre ${boutonModifier('depart')}</h3><div class="liste pointage">
+      ${utiles.map(i => ligneCochable(i, 'depart', i.note ? esc(i.note) : '')).join('') || '<p class="vide">Liste vide.</p>'}
+      <button class="ajouter" data-action="f-ajout" data-v="depart">+ Ajouter</button></div></section>
+    ${siBesoin.length ? bloc('Si besoin', siBesoin.map(i => ligneCochable(i, 'depart', i.note ? esc(i.note) : '')).join(''), 'pointage') : ''}
+    <div class="actions-bas"><button class="bouton" data-action="f-nouveau-depart">Nouveau départ</button></div>`;
+}
+
+// ====== Onglet Courses ======
+
+function vueCourses() {
+  const items = fam().filter(f => f.module === 'courses').sort(parOrdre);
+  const aPrendre = items.filter(i => !i.coche), pris = items.filter(i => i.coche);
+  return `<form class="ajout-rapide" id="ajout-courses" novalidate>
+      <input name="article" placeholder="Ajouter un article…" autocomplete="off" enterkeyhint="done" aria-label="Article">
+      <button class="bouton principal" aria-label="Ajouter">+</button></form>
+    <section class="bloc"><h3>À acheter · ${aPrendre.length} ${boutonModifier('courses')}</h3><div class="liste pointage">
+      ${aPrendre.map(i => ligneCochable(i, 'courses')).join('') || '<p class="vide">Rien à acheter.</p>'}</div></section>
+    ${pris.length ? `<section class="bloc"><h3>Dans le panier · ${pris.length}</h3><div class="liste pointage">
+      ${pris.map(i => ligneCochable(i, 'courses')).join('')}</div></section>
+      <div class="actions-bas"><button class="bouton" data-action="f-retirer" data-v="courses">Vider le panier</button></div>` : ''}`;
+}
+
+// ====== Onglet Tâches ======
+
+function vueTaches() {
+  const items = fam().filter(f => f.module === 'taches')
+    .sort((a, b) => (a.date || '9999').localeCompare(b.date || '9999') || parOrdre(a, b));
+  const detail = i => [i.qui || 'Tout le monde', i.date ? 'pour le ' + dateCourte(i.date) : '', i.note ? esc(i.note) : ''].filter(Boolean).join(' · ');
+  const aFaire = items.filter(i => !i.coche), faites = items.filter(i => i.coche);
+  return `<section class="bloc"><h3>À faire · ${aFaire.length} ${boutonModifier('taches')}</h3><div class="liste pointage">
+      ${aFaire.map(i => ligneCochable(i, 'taches', detail(i))).join('') || '<p class="vide">Rien à faire, profitez !</p>'}
+      <button class="ajouter" data-action="f-ajout" data-v="taches">+ Ajouter une tâche</button></div></section>
+    ${faites.length ? `<section class="bloc"><h3>Faites · ${faites.length}</h3><div class="liste pointage">
+      ${faites.map(i => ligneCochable(i, 'taches', detail(i))).join('')}</div></section>
+      <div class="actions-bas"><button class="bouton" data-action="f-retirer" data-v="taches">Retirer les tâches faites</button></div>` : ''}`;
+}
+
+// ====== Onglet Échéances (entretien, santé, papiers, anniversaires) ======
+
+const aujourdhuiDate = () => new Date(aujourdhuiIso() + 'T12:00');
+function ajouterMoisDate(iso, n) {
+  const [y, m, j] = iso.split('-').map(Number);
+  const dt = new Date(y, m - 1 + n, 1, 12);
+  dt.setDate(Math.min(j, new Date(dt.getFullYear(), dt.getMonth() + 1, 0).getDate()));
+  return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
+}
+/** Prochaine date d'une échéance (anniversaire : prochaine occurrence) et nombre de jours d'ici là. */
+function prochaine(it) {
+  if (!it.date) return null;
+  let iso = it.date;
+  if (it.groupe === 'Anniversaires') {
+    const t = aujourdhuiDate(), [, m, j] = it.date.split('-');
+    iso = t.getFullYear() + '-' + m + '-' + j;
+    if (new Date(iso + 'T12:00') < t) iso = (t.getFullYear() + 1) + '-' + m + '-' + j;
+  }
+  return { iso, jours: Math.round((new Date(iso + 'T12:00') - aujourdhuiDate()) / 86400000) };
+}
+function libelleEcheance(it, p) {
+  if (!p) return { texte: 'date à renseigner', etat: 'sans' };
+  const quand = p.jours === 0 ? 'aujourd’hui' : p.jours === 1 ? 'demain' : p.jours < 0 ? 'en retard de ' + (-p.jours) + ' j' : 'dans ' + p.jours + ' j';
+  if (it.groupe === 'Anniversaires') {
+    const an = Number(it.date.slice(0, 4)), age = an > 1900 ? Number(p.iso.slice(0, 4)) - an : null;
+    return { texte: (age ? age + ' ans le ' : 'le ') + new Date(p.iso + 'T12:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) + ' · ' + quand,
+      etat: p.jours <= 14 ? 'bientot' : 'ok' };
+  }
+  return { texte: dateCourte(p.iso) + ' · ' + quand, etat: p.jours < 0 ? 'retard' : p.jours <= 30 ? 'bientot' : 'ok' };
+}
+
+function vueEcheances() {
+  const items = fam().filter(f => f.module === 'echeances' && f.groupe === echeCat)
+    .map(it => ({ it, p: prochaine(it) }))
+    .sort((a, b) => (a.p ? a.p.jours : 99999) - (b.p ? b.p.jours : 99999) || parOrdre(a.it, b.it));
+  return `${puces(CATS_ECHEANCES.map(c => [c, c]), echeCat, 'f-cat-eche')}
+    <div class="liste">${items.map(({ it, p }) => {
+      const l = libelleEcheance(it, p);
+      const sous = [it.qui, it.periode && it.groupe !== 'Anniversaires' ? 'tous les ' + it.periode + ' mois' : '', it.note ? esc(it.note) : ''].filter(Boolean).join(' · ');
+      return `<div class="ligne"><button class="corps" data-action="f-echeance" data-id="${it.id}">
+        <span class="pastille ${l.etat}"></span>
+        <span class="nom long">${esc(it.titre)}${sous ? `<small>${sous}</small>` : ''}</span>
+        <span class="quand ${l.etat}">${l.texte}</span></button></div>`;
+    }).join('') || '<p class="vide">Rien pour l’instant.</p>'}
+      <button class="ajouter" data-action="f-echeance">+ Ajouter</button></div>`;
+}
+
+function fenetreEcheance(it) {
+  const anniv = (it ? it.groupe : echeCat) === 'Anniversaires';
+  const periodique = it && it.periode && !anniv;
+  ouvrir({
+    titre: it ? it.titre : 'Nouveau · ' + echeCat,
+    champs: [
+      { k: 'titre', label: anniv ? 'Prénom' : 'Intitulé', valeur: it ? it.titre : '', obligatoire: true },
+      { k: 'date', label: anniv ? 'Date de naissance' : 'Prochaine échéance', type: 'date', valeur: it ? it.date : '' },
+    ].concat(anniv ? [] : [
+      { k: 'periode', label: 'À refaire tous les (mois)', type: 'nombre', valeur: it ? it.periode : null, vide: 'une seule fois' },
+      { k: 'qui', label: 'Pour qui', type: 'choix', valeur: it ? it.qui : '', options: [['', '—']].concat(gens().map(p => [p, p])) }
+    ]).concat([{ k: 'note', label: 'Note', valeur: it ? it.note : '' }]),
+    supprimer: it ? () => effacerFamille(it) : null,
+    action2: periodique ? { libelle: 'Fait aujourd’hui', fn: () =>
+      sauverFamille(Object.assign({}, it, { date: ajouterMoisDate(aujourdhuiIso(), it.periode) })) } : null,
+    valider: v => sauverFamille(Object.assign({ module: 'echeances', groupe: echeCat }, it || {}, v))
+  });
+}
+
+// ====== Onglet Carnet (contacts, tailles) ======
+
+function vueCarnet() {
+  const items = fam().filter(f => f.module === 'carnet' && f.groupe === carnetCat).sort(parOrdre);
+  const ligne = it => {
+    const tel = carnetCat === 'Contacts' && /^[+\d][\d .-]{5,}$/.test(String(it.valeur || '').trim());
+    return `<div class="ligne"><button class="corps" data-action="f-carnet" data-id="${it.id}">
+      <span class="nom">${esc(it.titre)}${it.note ? `<small>${esc(it.note)}</small>` : ''}</span>
+      <span class="montant ${it.valeur ? '' : 'vide-val'}">${it.valeur ? esc(it.valeur) : 'à compléter'}</span></button>
+      ${tel ? `<a class="appel" href="tel:${esc(String(it.valeur).replace(/[ .-]/g, ''))}" aria-label="Appeler ${esc(it.titre)}">${icone('telephone', 1.8)}</a>` : ''}</div>`;
+  };
+  let contenu;
+  if (carnetCat === 'Tailles') {
+    const qui = [...new Set(d.enfants.concat(items.map(i => i.qui).filter(Boolean)))];
+    contenu = qui.map(q => bloc(q, items.filter(i => i.qui === q).map(ligne).join('')
+      + `<button class="ajouter" data-action="f-carnet" data-qui="${esc(q)}">+ Ajouter</button>`)).join('');
+  } else {
+    contenu = `<div class="liste">${items.map(ligne).join('') || '<p class="vide">Aucun contact.</p>'}
+      <button class="ajouter" data-action="f-carnet">+ Ajouter</button></div>`;
+  }
+  return puces([['Contacts', 'Contacts utiles'], ['Tailles', 'Tailles & pointures']], carnetCat, 'f-cat-carnet') + contenu;
+}
+
+function fenetreCarnet(it, qui) {
+  const tailles = (it ? it.groupe : carnetCat) === 'Tailles';
+  ouvrir({
+    titre: it ? it.titre + (it.qui ? ' · ' + it.qui : '') : tailles ? 'Nouvelle taille · ' + (qui || '') : 'Nouveau contact',
+    champs: [
+      { k: 'titre', label: tailles ? 'Quoi (ex. Pointure)' : 'Nom (ex. Pédiatre)', valeur: it ? it.titre : '', obligatoire: true },
+      { k: 'valeur', label: tailles ? 'Taille' : 'Téléphone', valeur: it ? it.valeur : '' },
+      { k: 'note', label: tailles ? 'Note (marque, date…)' : 'Note (nom, adresse…)', valeur: it ? it.note : '' }
+    ],
+    supprimer: it ? () => effacerFamille(it) : null,
+    valider: v => sauverFamille(Object.assign({ module: 'carnet', groupe: carnetCat, qui: qui || '' }, it || {}, v))
+  });
+}
+
+document.addEventListener('submit', e => {
+  if (e.target.id !== 'ajout-courses') return;
+  e.preventDefault();
+  const champ = e.target.elements.article, titre = champ.value.trim();
+  if (!titre) return;
+  sauverFamille({ module: 'courses', titre });
+  setTimeout(() => { const c = document.querySelector('#ajout-courses input'); if (c) c.focus(); }, 0);
+});
+
+/** Clics propres à l'espace Famille ; renvoie true si le clic a été traité. */
+function clicFamille(b) {
+  const id = b.dataset.id, v = b.dataset.v, it = id ? fam().find(x => x.id === id) : null;
+  switch (b.dataset.action) {
+    case 'zones': ouvrirZones(); return true;
+    case 'zones-fermer': fermerZones(); return true;
+    case 'zone': choisirZone(b.dataset.z); return true;
+    case 'f-cocher': if (it) basculerFamille(it); return true;
+    case 'f-item': if (it) fenetreItem(it, it.module); return true;
+    case 'f-edition': edition.has(v) ? edition.delete(v) : edition.add(v); rendre(); return true;
+    case 'f-enfant': departEnfant = v; rendre(); return true;
+    case 'f-liste': departListe = v; rendre(); return true;
+    case 'f-ajout': fenetreItem(null, v, v === 'depart' ? { groupe: departEnfant, liste: departListe } : {}); return true;
+    case 'f-nouveau-depart':
+      if (confirm('Tout décocher dans « ' + departListe + ' » pour ' + departEnfant + ' ?')) {
+        fam().filter(f => f.module === 'depart' && f.groupe === departEnfant && f.liste === departListe).forEach(f => { f.coche = false; });
+        rendre();
+        serveur('decocher', { module: 'depart', groupe: departEnfant, liste: departListe, mois: d.mois });
+      }
+      return true;
+    case 'f-retirer':
+      d.famille = fam().filter(f => !(f.module === v && f.coche));
+      rendre();
+      serveur('retirerCoches', { module: v, mois: d.mois });
+      return true;
+    case 'f-cat-eche': echeCat = v; rendre(); return true;
+    case 'f-echeance': fenetreEcheance(it); return true;
+    case 'f-cat-carnet': carnetCat = v; rendre(); return true;
+    case 'f-carnet': fenetreCarnet(it, b.dataset.qui); return true;
+    case 'f-action2': fenetre.close(); fenetreCourante.action2.fn(); return true;
+  }
+  return false;
+}
+
 // ====== Clics ======
 
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-action]');
   if (!b || b.disabled) return;
+  if (clicFamille(b)) return;
   const id = b.dataset.id, trouve = (liste) => liste.find(x => x.id === id);
   switch (b.dataset.action) {
-    case 'onglet': onglet = b.dataset.k; rendre(); window.scrollTo(0, 0); break;
+    case 'onglet': ongletParZone[zone] = b.dataset.k; rendre(); window.scrollTo(0, 0); break;
     case 'mois': charger(b.dataset.m); break;
     case 'rafraichir':
       if (!d) document.getElementById('vue').innerHTML = '<p class="vide">Chargement…</p>';
@@ -1274,6 +1722,7 @@ document.addEventListener('visibilitychange', () => {
 // ====== Démarrage ======
 
 function demarrer() {
+  appliquerZone();
   if (!/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(API)) {
     afficherMessage('Adresse du serveur manquante',
       'Colle l’adresse /exec du déploiement Apps Script dans index.html, à la ligne « const API = … ».', false);
