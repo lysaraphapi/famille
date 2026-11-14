@@ -35,6 +35,7 @@
     --coche-faite: #d0d8d4;
     --bandeau-texte: #557568;
     --rayon: 20px;
+    --verre-haut: rgba(244,246,245,.6);   /* verre de l'en-tête, couleur du fond */
     color-scheme: light;
   }
   /* Espace Famille : vieux jaune pastel */
@@ -47,6 +48,19 @@
     --coche-faite: #ddd6c2;
     --bandeau-texte: #7a6527;
     --fait: #c4bfb1;
+    --verre-haut: rgba(247,245,238,.6);
+  }
+  /* Espace Coffre : bleu-gris pastel */
+  :root[data-zone="coffre"] {
+    --fond: #f3f5f8;
+    --accent: #56708c;
+    --accent-pastel: #c8d5e4;
+    --accent-doux: rgba(200,213,228,.38);
+    --accent-texte: #3a5370;
+    --coche-faite: #d2d9e1;
+    --bandeau-texte: #4f6681;
+    --fait: #bcc4ce;
+    --verre-haut: rgba(243,245,248,.6);
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; }
@@ -78,6 +92,16 @@
       radial-gradient(60% 45% at 90% 100%, rgba(244,228,214,.32), transparent 70%),
       var(--fond);
   }
+  .fond-coffre {
+    position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0; transition: opacity .6s;
+    background:
+      radial-gradient(60% 45% at 8% 0%, rgba(200,214,236,.50), transparent 70%),
+      radial-gradient(55% 40% at 100% 15%, rgba(222,216,240,.38), transparent 70%),
+      radial-gradient(60% 45% at 90% 100%, rgba(212,230,236,.36), transparent 70%),
+      var(--fond);
+  }
+  :root[data-zone="coffre"] body::before { opacity: 0; }
+  :root[data-zone="coffre"] .fond-coffre { opacity: 1; }
   button, input, select, textarea { font: inherit; color: inherit; }
   button { cursor: pointer; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
   button:disabled { cursor: default; }
@@ -94,12 +118,17 @@
     background: var(--surface); border: 1px solid var(--lisere); box-shadow: var(--ombre);
   }
 
-  /* En-tête en verre */
+  /* En-tête en verre, qui se fond dans le fond de la page (pas de bord net) */
   header.haut {
     position: sticky; top: 0; z-index: 5; margin: 0 -18px; text-align: center;
     padding: calc(12px + env(safe-area-inset-top)) 18px 10px;
-    background: rgba(244,246,245,.7);
+  }
+  header.haut::before {
+    content: ""; position: absolute; left: 0; right: 0; top: 0; bottom: -26px; z-index: -1; pointer-events: none;
+    background: linear-gradient(to bottom, var(--verre-haut) 0%, var(--verre-haut) 50%, transparent 100%);
     -webkit-backdrop-filter: var(--flou); backdrop-filter: var(--flou);
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 50%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0%, #000 50%, transparent 100%);
   }
   header.haut h1 { font-size: 15.5px; font-weight: 600; margin: 0; letter-spacing: -.01em; }
   #etat {
@@ -323,10 +352,12 @@
   .zone-carte:active { opacity: .6; }
   .zone-carte.active[data-z="budget"] { border-color: #b5ddcf; background: rgba(220,240,232,.6); }
   .zone-carte.active[data-z="famille"] { border-color: #eedd9c; background: rgba(250,242,212,.7); }
+  .zone-carte.active[data-z="coffre"] { border-color: #c8d5e4; background: rgba(226,233,243,.7); }
   .zone-icone { flex: none; width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; }
   .zone-icone svg { width: 22px; height: 22px; }
   [data-z="budget"] .zone-icone { background: #dcefe7; color: #43907a; }
   [data-z="famille"] .zone-icone { background: #f7edc6; color: #9c7a22; }
+  [data-z="coffre"] .zone-icone { background: #e1e8f1; color: #56708c; }
   .zone-texte b { display: block; font-size: 16px; font-weight: 600; }
   .zone-texte small { display: block; font-size: 12px; color: var(--discret); margin-top: 1px; }
 
@@ -337,7 +368,10 @@
     transition: background-color .25s, color .25s, box-shadow .25s;
   }
   .segment button.actif { background: rgba(255,255,255,.95); color: var(--texte); box-shadow: 0 1px 3px rgba(39,50,46,.08); }
-  .puces { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 16px; }
+  .puces { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 16px; align-items: center; }
+  .listes-depart { flex-wrap: nowrap; gap: 6px; }
+  .listes-depart .puce { flex: 1 1 auto; padding: 7px 8px; min-width: 0; white-space: nowrap; }
+  .sep-puces { width: 1px; height: 22px; margin: 0 3px; background: var(--bord); border-radius: 1px; }
   .avancement { display: grid; gap: 10px; padding: 14px 16px; margin-bottom: 14px; }
   .avancement > div:first-child { display: flex; justify-content: space-between; align-items: baseline; }
   .avancement span { font-size: 12.5px; color: var(--discret); }
@@ -367,11 +401,44 @@
   .quand.bientot { color: #a07d1c; }
   .quand.retard { color: var(--alerte); }
   .vide-val { color: var(--fait); font-weight: 400; }
-  .appel {
-    flex: none; width: 36px; height: 36px; margin-right: 10px; border-radius: 50%; display: grid; place-items: center;
-    background: var(--accent-doux); color: var(--accent);
+
+  /* Espace Coffre */
+  .coffre-etat { margin: 12px 0 22px; padding: 24px 20px 20px; text-align: center; }
+  .coffre-etat svg { width: 30px; height: 30px; color: var(--accent); }
+  .coffre-etat h4 { margin: 6px 0 4px; font-size: 16px; font-weight: 600; }
+  .coffre-etat p { margin: 0 0 16px; font-size: 13px; color: var(--discret); }
+  .coffre-etat .bouton { width: 100%; }
+  .coffre-bandeau { margin: 10px 0 16px; }
+  .secret-val {
+    flex: none; max-width: 46%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font: 500 14.5px ui-monospace, "SF Mono", Menlo, monospace; letter-spacing: .02em;
   }
-  .appel svg { width: 17px; height: 17px; }
+  .secret-val.masque { color: var(--fait); letter-spacing: .14em; font-weight: 400; }
+  .secret-val.illisible { font: 12px -apple-system, system-ui, sans-serif; color: var(--alerte); }
+  .copier {
+    flex: none; width: 44px; height: 44px; margin-right: 4px; border: 0; background: none; color: var(--accent);
+    display: grid; place-items: center; border-radius: 12px;
+  }
+  .copier svg { width: 18px; height: 18px; }
+  .copier:active { opacity: .5; }
+  .recherche {
+    width: 100%; margin: 10px 0 18px; padding: 11px 14px; border: 1px solid var(--bord); border-radius: 13px;
+    background: rgba(255,255,255,.75); font-size: 16px; -webkit-appearance: none; appearance: none;
+  }
+  .recherche:focus { outline: 2px solid var(--accent-pastel); outline-offset: -1px; }
+  .champ .avec-copie { display: flex; gap: 8px; align-items: center; }
+  .champ .avec-copie input { flex: 1; min-width: 0; }
+  .champ .avec-copie .copier { width: 48px; height: 48px; margin: 0; border: 1px solid var(--bord); background: rgba(255,255,255,.75); border-radius: 13px; }
+  a.corps { color: inherit; text-decoration: none; }
+  a.corps:active { opacity: .5; }
+  .ouvre-lien { flex: none; color: var(--accent); display: grid; }
+  .ouvre-lien svg { width: 16px; height: 16px; }
+  .toast {
+    position: fixed; left: 50%; bottom: calc(86px + env(safe-area-inset-bottom)); z-index: 40;
+    transform: translate(-50%, 8px); padding: 9px 16px; border-radius: 999px; pointer-events: none;
+    background: rgba(42,52,49,.86); color: #fff; font-size: 13.5px; font-weight: 500; opacity: 0; transition: opacity .2s, transform .2s;
+  }
+  .toast.visible { opacity: 1; transform: translate(-50%, 0); }
 
   /* Graphique des dépenses */
   .tuile.ouvre span::after { content: " ›"; color: var(--accent); }
@@ -479,6 +546,7 @@
 </style>
 </head>
 <body>
+<div class="fond-coffre" aria-hidden="true"></div>
 <div class="page">
   <header class="haut">
     <h1><button id="titre-zone" class="titre-zone" data-action="zones" aria-haspopup="dialog" aria-expanded="false">
@@ -499,7 +567,10 @@
       <span class="zone-texte"><b>Budget</b><small>Mois, charges, crédits, épargne, impôts</small></span></button>
     <button class="zone-carte" data-action="zone" data-z="famille">
       <span class="zone-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7a3 3 0 106 0 3 3 0 00-6 0M4 21v-1a5 5 0 015-5h6a5 5 0 015 5v1"/></svg></span>
-      <span class="zone-texte"><b>Famille</b><small>Départ, courses, tâches, échéances, carnet</small></span></button>
+      <span class="zone-texte"><b>Famille</b><small>Départ, courses, tâches, échéances</small></span></button>
+    <button class="zone-carte" data-action="zone" data-z="coffre">
+      <span class="zone-icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6l7-3zM9.5 11.5v-1a2.5 2.5 0 015 0v1M9 11.5h6v4H9z"/></svg></span>
+      <span class="zone-texte"><b>Coffre</b><small>Codes, comptes, documents</small></span></button>
   </div>
 </div>
 
@@ -604,11 +675,11 @@ function demanderCode(message) {
   document.getElementById('vue').innerHTML = `<form class="accueil" id="form-code" novalidate>
     <img src="icone-180.png" alt="">
     <h2>Famille</h2>
-    <p class="aide">Saisis le code familial pour accéder au budget. Il ne te sera demandé qu’une fois sur cet appareil.</p>
+    <p class="aide">Saisis le code familial pour accéder à l’appli. Il ne te sera demandé qu’une fois sur cet appareil.</p>
     <label class="champ"><span>Code familial</span>
       <input name="code" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false"></label>
     ${message ? `<p class="erreur">${esc(message)}</p>` : ''}
-    <button type="submit" class="bouton principal">Accéder au budget</button>
+    <button type="submit" class="bouton principal">Accéder à l’appli</button>
   </form>`;
 }
 
@@ -793,11 +864,15 @@ const ICONES = {
   crayon: '<path d="M4 20h4L19 9l-4-4L4 16v4zM14 6l4 4"/>',
   cadenas: '<path d="M6 11h12v9H6zM8.5 11V8a3.5 3.5 0 017 0v3"/>',
   depart: '<path d="M5 8h14v11H5zM9 8V5h6v3M5 13h14"/>',
+  codes: '<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M15 8l2 2"/>',
+  comptes: '<rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="11" r="2.5"/><path d="M5.5 17a3.5 3.5 0 017 0M15 10h3M15 14h3"/>',
+  documents: '<path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>',
+  copier: '<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 012-2h8"/>',
+  ouvrir: '<path d="M14 4h6v6M20 4l-9 9M18 14v4a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2h4"/>',
+  cadenasOuvert: '<path d="M6 11h12v9H6zM8.5 11V8a3.5 3.5 0 016.8-1.2"/>',
   courses: '<path d="M4 5h2l2 10h10l2-7H7M10 19.5h.01M17 19.5h.01"/>',
   taches: '<path d="M4 5h16v14H4zM8 12l3 3 5-6"/>',
-  echeances: '<path d="M12 3a7 7 0 00-7 7v4l-2 3h18l-2-3v-4a7 7 0 00-7-7zM10 20a2 2 0 004 0"/>',
-  carnet: '<path d="M6 3h12v18H6zM9 3v18M12 8h3M12 12h3"/>',
-  telephone: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2"/>'
+  echeances: '<path d="M12 3a7 7 0 00-7 7v4l-2 3h18l-2-3v-4a7 7 0 00-7-7zM10 20a2 2 0 004 0"/>'
 };
 const icone = (n, style) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${style || 1.8}" stroke-linecap="round" stroke-linejoin="round">${ICONES[n]}</svg>`;
 
@@ -814,8 +889,16 @@ function rendre() {
     [...nav.children].forEach(b => b.classList.toggle('actif', b.dataset.k === onglet));
   }
   const vues = { mois: vueMois, charges: vueCharges, credits: vueCredits, epargne: vueEpargne, impots: vueImpots,
-    depart: vueDepart, courses: vueCourses, taches: vueTaches, echeances: vueEcheances, carnet: vueCarnet };
+    depart: vueDepart, courses: vueCourses, taches: vueTaches, echeances: vueEcheances,
+    codes: vueCodes, comptes: vueComptes, documents: vueDocuments };
+  // Si on tapait dans la recherche, on garde le curseur dedans après la mise à jour
+  const tapait = document.activeElement && document.activeElement.classList.contains('recherche');
   document.getElementById('vue').innerHTML = vues[onglet]();
+  if (zone === 'coffre') {
+    filtrerCoffre();
+    if (tapait) { const r = document.querySelector('#vue .recherche'); if (r) { r.focus(); r.setSelectionRange(r.value.length, r.value.length); } }
+    if (cleCoffre) dechiffrerManquants().then(change => { if (change) rendre(); });
+  }
 }
 
 /** Une ligne de liste. opts : pointer (toucher = cocher), jour (afficher le jour), action, nom, montant, inactive. */
@@ -915,8 +998,10 @@ function vueCharges() {
 }
 
 function vueCredits() {
-  const cartes = d.credits.map(c => {
-    const p = projeterCredit(c, d.moisCourant);
+  // Du plus petit restant dû au plus grand
+  const cartes = d.credits.map(c => ({ c, p: projeterCredit(c, d.moisCourant) }))
+    .sort((a, b) => a.p.aujourdhui - b.p.aujourdhui || String(a.c.nom).localeCompare(b.c.nom))
+    .map(({ c, p }) => {
     const ouvert = ouverts.has(c.id);
     const rythme = p.tableau ? (p.echeances.length ? eur(p.echeances[0].paye) + ' la prochaine échéance' : '') : eur(c.mensualite) + ' par mois';
     return `<div class="carte credit">
@@ -1031,6 +1116,11 @@ function champHtml(c) {
     entree = `<input ${nom} type="month" value="${esc(v)}">`;
   } else if (c.type === 'date') {
     entree = `<input ${nom} type="date" value="${esc(v)}">`;
+  } else if (c.type === 'secret') {
+    entree = `<input ${nom} type="password" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">`;
+  } else if (c.type === 'brut' || c.type === 'lien') {
+    entree = `<input ${nom} ${c.type === 'lien' ? 'type="url" inputmode="url" placeholder="https://…"' : ''} autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" value="${esc(v)}">`;
+    if (c.copier) entree = `<span class="avec-copie">${entree}<button type="button" class="copier" data-action="c-copier-champ" data-k="${c.k}" aria-label="Copier">${icone('copier')}</button></span>`;
   } else if (c.type === 'liste') {
     entree = `<input ${nom} list="l-${c.k}" autocomplete="off" value="${esc(v)}"><datalist id="l-${c.k}">${c.options.map(o => `<option value="${esc(o)}">`).join('')}</datalist>`;
   } else {
@@ -1046,7 +1136,7 @@ function lireNombre(s) {
   return isFinite(x) ? x : NaN;
 }
 
-formulaire.addEventListener('submit', e => {
+formulaire.addEventListener('submit', async e => {
   e.preventDefault();
   const def = fenetreCourante, valeurs = {};
   for (const c of def.champs) {
@@ -1069,6 +1159,17 @@ formulaire.addEventListener('submit', e => {
     }
   }
   if (def.verifier) { const pb = def.verifier(valeurs); if (pb) return erreur(pb); }
+  if (def.validerAsync) {                       // ex. coffre : calcul de la clé, chiffrement
+    const bouton = formulaire.querySelector('button[type="submit"]'), libelle = bouton.textContent;
+    bouton.disabled = true; bouton.textContent = def.libelleAttente || 'Un instant…';
+    let pb;
+    try { pb = await def.validerAsync(valeurs); } catch (err) { pb = err && err.message ? err.message : String(err); }
+    if (fenetreCourante !== def) return;        // une autre fenêtre a pris la place
+    bouton.disabled = false; bouton.textContent = libelle;
+    if (pb) return erreur(pb);
+    fenetre.close();
+    return;
+  }
   fenetre.close();
   def.valider(valeurs);
 });
@@ -1357,11 +1458,12 @@ function proposerCloture(mois) {
 
 const ZONES = {
   budget: { nom: 'Budget', fond: '#f4f6f5', onglets: [['mois', 'Mois'], ['charges', 'Charges'], ['credits', 'Crédits'], ['epargne', 'Épargne'], ['impots', 'Impôts']] },
-  famille: { nom: 'Famille', fond: '#f7f5ee', onglets: [['depart', 'Départ'], ['courses', 'Courses'], ['taches', 'Tâches'], ['echeances', 'Échéances'], ['carnet', 'Carnet']] }
+  famille: { nom: 'Famille', fond: '#f7f5ee', onglets: [['depart', 'Départ'], ['courses', 'Courses'], ['taches', 'Tâches'], ['echeances', 'Échéances']] },
+  coffre: { nom: 'Coffre', fond: '#f3f5f8', onglets: [['codes', 'Codes'], ['comptes', 'Comptes'], ['documents', 'Documents']] }
 };
 const CLE_ZONE = 'famille:zone';
 let zone = ZONES[stock.lire(CLE_ZONE)] ? stock.lire(CLE_ZONE) : 'budget';
-const ongletParZone = { budget: 'mois', famille: 'depart' };
+const ongletParZone = { budget: 'mois', famille: 'depart', coffre: 'codes' };
 
 function appliquerZone() {
   document.documentElement.dataset.zone = zone;
@@ -1405,8 +1507,12 @@ const nouvelIdLocal = () => (window.crypto && crypto.randomUUID ? crypto.randomU
 const parOrdre = (a, b) => (a.ordre || 0) - (b.ordre || 0) || String(a.titre).localeCompare(b.titre);
 const ordreSuivant = () => fam().reduce((m, x) => Math.max(m, x.ordre || 0), 0) + 1;
 const edition = new Set();       // modules en mode « Modifier »
-let departEnfant = null, departListe = 'Week-end', echeCat = 'Entretien', carnetCat = 'Contacts';
-const LISTES_DEPART = ['Week-end', 'Crèche', 'Vacances'];
+let departEnfant = null, departListe = 'Matin', echeCat = 'Entretien';
+const LISTES_DEPART = ['Matin', 'Soir', 'Week-end', 'Vacances'];   // séparateur entre Soir et Week-end
+const ORDRE_ENFANTS = ['Roman', 'Paloma'];                         // Roman à gauche, Paloma à droite
+const rangEnfant = e => { const i = ORDRE_ENFANTS.indexOf(e); return i < 0 ? 99 : i; };
+/** Texte comparable (sans accents ni majuscules), pour repérer les doublons. */
+const normaliser = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
 const CATS_ECHEANCES = ['Entretien', 'Santé', 'Papiers', 'Anniversaires'];
 const gens = () => [...new Set(d.personnes.concat(d.enfants))];
 
@@ -1453,9 +1559,16 @@ function fenetreItem(it, module, defauts) {
     { k: 'qui', label: 'Qui s’en occupe', type: 'choix', valeur: it ? it.qui : '', options: [['', 'Tout le monde']].concat(d.personnes.map(p => [p, p])) },
     { k: 'date', label: 'Pour le (facultatif)', type: 'date', valeur: it ? it.date : '' });
   if (module !== 'courses') champs.push({ k: 'note', label: 'Note', valeur: it ? it.note : '' });
+  const groupe = it ? it.groupe : (defauts || {}).groupe, liste = it ? it.liste : (defauts || {}).liste;
   ouvrir({
     titre: it ? it.titre : module === 'taches' ? 'Nouvelle tâche' : 'Nouvel article',
     champs,
+    // Pas deux fois le même article dans une liste de départ (ni dans les courses à acheter)
+    verifier: v => {
+      const doublon = fam().find(x => x.module === module && x.id !== (it && it.id) && normaliser(x.titre) === normaliser(v.titre)
+        && (module === 'depart' ? x.groupe === groupe && x.liste === liste : module === 'courses' ? !x.coche : false));
+      return doublon ? '« ' + doublon.titre + ' » est déjà dans la liste.' : '';
+    },
     supprimer: it ? () => effacerFamille(it) : null,
     valider: v => sauverFamille(Object.assign({ module }, defauts || {}, it || {}, v))
   });
@@ -1464,18 +1577,21 @@ function fenetreItem(it, module, defauts) {
 // ====== Onglet Départ ======
 
 function vueDepart() {
-  const enfants = d.enfants.length ? d.enfants : ['Enfant'];
+  const enfants = d.enfants.length ? [...d.enfants].sort((a, b) => rangEnfant(a) - rangEnfant(b)) : ['Enfant'];
   if (enfants.indexOf(departEnfant) < 0) departEnfant = enfants[0];
   const autres = [...new Set(fam().filter(f => f.module === 'depart' && f.groupe === departEnfant).map(f => f.liste))]
-    .filter(l => LISTES_DEPART.indexOf(l) < 0);
+    .filter(l => l && LISTES_DEPART.indexOf(l) < 0);
   const listes = LISTES_DEPART.concat(autres);
   if (listes.indexOf(departListe) < 0) departListe = listes[0];
+  const puceListe = l => `<button class="puce ${l === departListe ? 'actif' : ''}" data-action="f-liste" data-v="${esc(l)}">${esc(l)}</button>`;
+  const choixListes = `<div class="puces listes-depart">${puceListe('Matin')}${puceListe('Soir')}<span class="sep-puces" aria-hidden="true"></span>`
+    + listes.slice(2).map(puceListe).join('') + '</div>';
   const items = fam().filter(f => f.module === 'depart' && f.groupe === departEnfant && f.liste === departListe).sort(parOrdre);
   const utiles = items.filter(i => !i.option), siBesoin = items.filter(i => i.option);
   const faits = utiles.filter(i => i.coche).length;
   const pret = utiles.length > 0 && faits === utiles.length;
   return `<div class="segment">${enfants.map(e => `<button class="${e === departEnfant ? 'actif' : ''}" data-action="f-enfant" data-v="${esc(e)}">${esc(e)}</button>`).join('')}</div>
-    ${puces(listes.map(l => [l, l]), departListe, 'f-liste')}
+    ${choixListes}
     <div class="carte avancement">
       <div><span>${esc(departListe)} · ${esc(departEnfant)}</span><b>${faits} / ${utiles.length}</b></div>
       <div class="jauge"><i style="width:${utiles.length ? Math.round(faits / utiles.length * 100) : 0}%"></i></div>
@@ -1584,48 +1700,18 @@ function fenetreEcheance(it) {
   });
 }
 
-// ====== Onglet Carnet (contacts, tailles) ======
-
-function vueCarnet() {
-  const items = fam().filter(f => f.module === 'carnet' && f.groupe === carnetCat).sort(parOrdre);
-  const ligne = it => {
-    const tel = carnetCat === 'Contacts' && /^[+\d][\d .-]{5,}$/.test(String(it.valeur || '').trim());
-    return `<div class="ligne"><button class="corps" data-action="f-carnet" data-id="${it.id}">
-      <span class="nom">${esc(it.titre)}${it.note ? `<small>${esc(it.note)}</small>` : ''}</span>
-      <span class="montant ${it.valeur ? '' : 'vide-val'}">${it.valeur ? esc(it.valeur) : 'à compléter'}</span></button>
-      ${tel ? `<a class="appel" href="tel:${esc(String(it.valeur).replace(/[ .-]/g, ''))}" aria-label="Appeler ${esc(it.titre)}">${icone('telephone', 1.8)}</a>` : ''}</div>`;
-  };
-  let contenu;
-  if (carnetCat === 'Tailles') {
-    const qui = [...new Set(d.enfants.concat(items.map(i => i.qui).filter(Boolean)))];
-    contenu = qui.map(q => bloc(q, items.filter(i => i.qui === q).map(ligne).join('')
-      + `<button class="ajouter" data-action="f-carnet" data-qui="${esc(q)}">+ Ajouter</button>`)).join('');
-  } else {
-    contenu = `<div class="liste">${items.map(ligne).join('') || '<p class="vide">Aucun contact.</p>'}
-      <button class="ajouter" data-action="f-carnet">+ Ajouter</button></div>`;
-  }
-  return puces([['Contacts', 'Contacts utiles'], ['Tailles', 'Tailles & pointures']], carnetCat, 'f-cat-carnet') + contenu;
-}
-
-function fenetreCarnet(it, qui) {
-  const tailles = (it ? it.groupe : carnetCat) === 'Tailles';
-  ouvrir({
-    titre: it ? it.titre + (it.qui ? ' · ' + it.qui : '') : tailles ? 'Nouvelle taille · ' + (qui || '') : 'Nouveau contact',
-    champs: [
-      { k: 'titre', label: tailles ? 'Quoi (ex. Pointure)' : 'Nom (ex. Pédiatre)', valeur: it ? it.titre : '', obligatoire: true },
-      { k: 'valeur', label: tailles ? 'Taille' : 'Téléphone', valeur: it ? it.valeur : '' },
-      { k: 'note', label: tailles ? 'Note (marque, date…)' : 'Note (nom, adresse…)', valeur: it ? it.note : '' }
-    ],
-    supprimer: it ? () => effacerFamille(it) : null,
-    valider: v => sauverFamille(Object.assign({ module: 'carnet', groupe: carnetCat, qui: qui || '' }, it || {}, v))
-  });
-}
-
 document.addEventListener('submit', e => {
   if (e.target.id !== 'ajout-courses') return;
   e.preventDefault();
   const champ = e.target.elements.article, titre = champ.value.trim();
   if (!titre) return;
+  // Déjà sur la liste : pas de doublon ; s'il était dans le panier, il revient « à acheter »
+  const existant = fam().find(x => x.module === 'courses' && normaliser(x.titre) === normaliser(titre));
+  if (existant) {
+    champ.value = '';
+    if (existant.coche) basculerFamille(existant);
+    return;
+  }
   sauverFamille({ module: 'courses', titre });
   setTimeout(() => { const c = document.querySelector('#ajout-courses input'); if (c) c.focus(); }, 0);
 });
@@ -1657,9 +1743,386 @@ function clicFamille(b) {
       return true;
     case 'f-cat-eche': echeCat = v; rendre(); return true;
     case 'f-echeance': fenetreEcheance(it); return true;
-    case 'f-cat-carnet': carnetCat = v; rendre(); return true;
-    case 'f-carnet': fenetreCarnet(it, b.dataset.qui); return true;
     case 'f-action2': fenetre.close(); fenetreCourante.action2.fn(); return true;
+  }
+  return false;
+}
+
+// ====== Espace Coffre : codes, comptes, documents ======
+//
+// Les codes et les mots de passe sont chiffrés ICI, sur l'iPhone, avant d'être envoyés : le Sheet ne reçoit
+// qu'un texte illisible. La clé vient de la phrase secrète (PBKDF2-SHA256, 600 000 calculs, puis AES-GCM 256).
+// La phrase n'est jamais enregistrée, et la clé ne vit qu'en mémoire tant que le coffre est ouvert.
+
+const ID_CLE = 'CLE-COFFRE', ITERATIONS = 600000, VERROU_MS = 5 * 60 * 1000;
+const CATS_COMPTES = ['Banque', 'Assurances', 'Énergie', 'Internet et téléphone', 'Administration', 'Santé', 'Enfants', 'Achats', 'Autre'];
+const THEMES_DOCS = ['Maison', 'Voiture', 'Santé', 'Impôts', 'Enfants', 'Banque', 'Travail', 'Autre'];
+const SECRETS = { codes: ['code'], comptes: ['mdp', 'plus'], documents: [] };   // champs chiffrés de chaque rubrique
+let cleCoffre = null, temoinOuvert = null;   // clé AES (non exportable) et témoin qui a servi à l'ouvrir
+const clairs = new Map();                    // id → { secret, v } : secrets déchiffrés, en mémoire seulement
+let derniereActivite = Date.now();
+const rechercheCoffre = { comptes: '', documents: '' };
+const coffre = () => (d && d.coffre) || [];
+const lienSur = l => /^https:\/\/[^\s"'<>]+$/i.test(String(l || '').trim());
+const parNom = (a, b) => String(a.titre).localeCompare(String(b.titre), 'fr', { sensitivity: 'base' });
+
+// --- Chiffrement (Web Crypto, intégré à Safari) ---
+const octets = t => new TextEncoder().encode(t);
+const enB64 = b => { let s = ''; new Uint8Array(b).forEach(x => { s += String.fromCharCode(x); }); return btoa(s); };
+const deB64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+/** Majuscules et espaces en trop ignorés (l'iPhone met souvent une majuscule au début). */
+const normaliserPhrase = p => String(p || '').normalize('NFC').toLowerCase().replace(/\s+/g, ' ').trim();
+
+async function deriverCle(phrase, sel, iterations) {
+  const base = await crypto.subtle.importKey('raw', octets(normaliserPhrase(phrase)), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: deB64(sel.replace(/^s:/, '')), iterations, hash: 'SHA-256' },
+    base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+}
+/** Le chiffré est lié à l'id de la fiche : on ne peut pas le déplacer sur une autre fiche. */
+async function chiffrer(cle, id, objet) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv, additionalData: octets(id) }, cle, octets(JSON.stringify(objet)));
+  return 'v1:' + enB64(iv) + ':' + enB64(ct);
+}
+async function dechiffrer(cle, id, texte) {
+  const [v, iv, ct] = String(texte).split(':');
+  if (v !== 'v1' || !iv || !ct) throw new Error('Format inconnu');
+  const clair = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: deB64(iv), additionalData: octets(id) }, cle, deB64(ct));
+  return JSON.parse(new TextDecoder().decode(clair));
+}
+const cryptoDispo = () => !!(window.crypto && crypto.subtle && window.TextEncoder);
+
+// --- Ouvrir, fermer ---
+
+function verrouiller() {
+  const etaitOuvert = !!cleCoffre;
+  cleCoffre = null; temoinOuvert = null; clairs.clear();
+  if (fenetre.open && fenetreCourante && fenetreCourante.coffre) fenetre.close();   // une fiche affichait un secret
+  if (etaitOuvert && zone === 'coffre') rendre();
+}
+const activite = () => { derniereActivite = Date.now(); };
+['pointerdown', 'keydown'].forEach(t => document.addEventListener(t, activite, { passive: true }));
+const verifierDelai = () => { if (cleCoffre && Date.now() - derniereActivite > VERROU_MS) verrouiller(); };
+setInterval(verifierDelai, 20000);
+document.addEventListener('visibilitychange', verifierDelai);
+window.addEventListener('pagehide', verrouiller);
+
+/** Déchiffre ce qui ne l'est pas encore ; renvoie true si l'affichage doit être refait. */
+async function dechiffrerManquants() {
+  if (!cleCoffre || !d) return false;
+  // Phrase changée sur un autre iPhone (ou clé effacée) : on referme
+  if (!d.coffreCle || d.coffreCle.temoin !== temoinOuvert) { verrouiller(); return false; }
+  let change = false;
+  for (const f of coffre()) {
+    const c = clairs.get(f.id);
+    if (!f.secret) { if (c) { clairs.delete(f.id); change = true; } continue; }
+    if (c && c.secret === f.secret) continue;
+    const cle = cleCoffre;
+    let v = null;
+    try { v = await dechiffrer(cle, f.id, f.secret); } catch (e) { v = null; }
+    if (cle !== cleCoffre) return false;    // refermé pendant ce temps
+    clairs.set(f.id, { secret: f.secret, v });
+    change = true;
+  }
+  return change;
+}
+/** Valeur en clair d'une fiche (coffre ouvert) : objet, null si illisible, undefined si pas encore déchiffrée. */
+const clair = f => { const c = clairs.get(f.id); return c && c.secret === f.secret ? c.v : undefined; };
+
+function ouvrirCoffre(ensuite) {
+  if (!cryptoDispo()) { alert('Cet appareil ne sait pas chiffrer : mets à jour iOS.'); return; }
+  if (cleCoffre) { if (ensuite) ensuite(); return; }
+  if (!d.coffreCle) { fenetreNouvellePhrase(ensuite); return; }
+  ouvrir({
+    titre: 'Ouvrir le coffre',
+    texte: 'Tape la phrase secrète. Les majuscules ne comptent pas.',
+    champs: [{ k: 'phrase', label: 'Phrase secrète', type: 'secret' }],
+    libelleValider: 'Ouvrir', libelleAttente: 'Ouverture…',
+    validerAsync: async v => {
+      if (!v.phrase) return 'Tape la phrase secrète.';
+      const c = d.coffreCle;
+      const cle = await deriverCle(v.phrase, c.sel, c.iterations);
+      try { await dechiffrer(cle, ID_CLE, c.temoin); } catch (e) { return 'Phrase incorrecte.'; }
+      cleCoffre = cle; temoinOuvert = c.temoin; activite();
+      await dechiffrerManquants();
+      rendre();
+      if (ensuite) ensuite();
+    }
+  });
+}
+
+/** Contrôles communs à une nouvelle phrase (création ou changement). */
+function controlerNouvellePhrase(v) {
+  const p = normaliserPhrase(v.phrase);
+  if (p.length < 16) return 'Trop courte : au moins 16 caractères (4 ou 5 mots).';
+  if (p !== normaliserPhrase(v.phrase2)) return 'Les deux phrases ne sont pas identiques.';
+  if (!v.notee) return 'Coche la case une fois la phrase notée en lieu sûr.';
+  return '';
+}
+const champsNouvellePhrase = [
+  { k: 'phrase', label: 'Nouvelle phrase secrète', type: 'secret' },
+  { k: 'phrase2', label: 'Encore une fois', type: 'secret' },
+  { k: 'notee', label: 'Je l’ai notée en lieu sûr', type: 'case', valeur: false,
+    aide: 'Si elle est perdue, les codes et mots de passe le sont aussi : personne ne pourra les récupérer.' }
+];
+async function nouvelleCle(phrase) {
+  const sel = 's:' + enB64(crypto.getRandomValues(new Uint8Array(16)));
+  const cle = await deriverCle(phrase, sel, ITERATIONS);
+  return { cle, infos: { sel, iterations: ITERATIONS, temoin: await chiffrer(cle, ID_CLE, { ok: 'coffre' }) } };
+}
+
+function fenetreNouvellePhrase(ensuite) {
+  ouvrir({
+    titre: 'Créer la phrase secrète',
+    texte: 'Choisis 4 ou 5 mots sans lien entre eux, faciles à retenir mais impossibles à deviner (pas de prénoms ni de dates). Toute la famille utilisera la même.',
+    champs: champsNouvellePhrase,
+    libelleValider: 'Créer', libelleAttente: 'Création…',
+    validerAsync: async v => {
+      const pb = controlerNouvellePhrase(v);
+      if (pb) return pb;
+      const { cle, infos } = await nouvelleCle(v.phrase);
+      d.coffreCle = infos;
+      cleCoffre = cle; temoinOuvert = infos.temoin; activite();
+      rendre();
+      serveur('coffreCle', { cle: infos, mois: d.mois });
+      if (ensuite) ensuite();
+    }
+  });
+}
+
+function fenetreChangerPhrase() {
+  ouvrir({
+    titre: 'Changer la phrase secrète',
+    texte: 'Tous les codes et mots de passe seront rechiffrés avec la nouvelle phrase. Préviens le reste de la famille.',
+    coffre: true,
+    champs: [{ k: 'ancienne', label: 'Phrase actuelle', type: 'secret' }].concat(champsNouvellePhrase),
+    libelleValider: 'Changer', libelleAttente: 'Rechiffrement…',
+    validerAsync: async v => {
+      const c = d.coffreCle;
+      try { await dechiffrer(await deriverCle(v.ancienne, c.sel, c.iterations), ID_CLE, c.temoin); }
+      catch (e) { return 'Phrase actuelle incorrecte.'; }
+      const pb = controlerNouvellePhrase(v);
+      if (pb) return pb;
+      await dechiffrerManquants();
+      const avecSecret = coffre().filter(f => f.secret);
+      if (avecSecret.some(f => !clair(f))) return 'Certaines fiches sont illisibles : on ne peut pas changer la phrase.';
+      const { cle, infos } = await nouvelleCle(v.phrase);
+      const valeurs = new Map(avecSecret.map(f => [f.id, clair(f)]));
+      const fiches = [];
+      for (const f of avecSecret) fiches.push({ id: f.id, secret: await chiffrer(cle, f.id, valeurs.get(f.id)) });
+      const ancienTemoin = c.temoin;
+      fiches.forEach((x, i) => { avecSecret[i].secret = x.secret; });
+      d.coffreCle = infos; cleCoffre = cle; temoinOuvert = infos.temoin;
+      clairs.clear();
+      avecSecret.forEach(f => clairs.set(f.id, { secret: f.secret, v: valeurs.get(f.id) }));
+      rendre();
+      serveur('coffreChanger', { ancienTemoin, cle: infos, fiches, mois: d.mois });
+      toast('Phrase changée');
+    }
+  });
+}
+
+// --- Copier ---
+
+let minuteurToast = null;
+function toast(texte) {
+  let t = document.getElementById('toast');
+  if (!t) { t = document.createElement('div'); t.id = 'toast'; t.className = 'toast'; t.setAttribute('role', 'status'); }
+  (fenetre.open ? fenetre : document.body).appendChild(t);   // visible même au-dessus d'une fiche
+  t.textContent = texte;
+  void t.offsetWidth;
+  t.classList.add('visible');
+  clearTimeout(minuteurToast);
+  minuteurToast = setTimeout(() => t.classList.remove('visible'), 1400);
+}
+async function copier(texte) {
+  if (!texte) return;
+  try { await navigator.clipboard.writeText(texte); }
+  catch (e) {
+    const zoneTexte = document.createElement('textarea');
+    zoneTexte.value = texte; zoneTexte.setAttribute('readonly', ''); zoneTexte.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(zoneTexte); zoneTexte.select(); document.execCommand('copy'); zoneTexte.remove();
+  }
+  toast('Copié');
+}
+
+// --- Fiches ---
+
+/** Enregistre une fiche : les secrets sont chiffrés avant tout, et jamais gardés en clair dans les données. */
+async function sauverCoffre(f, rubrique, v) {
+  const o = {
+    id: f ? f.id : nouvelIdLocal(), rubrique, groupe: v.groupe || '', titre: v.titre, identifiant: v.identifiant || '',
+    lien: (v.lien || '').trim(), note: v.note || '', secret: f ? f.secret : '', ordre: f ? f.ordre : 0
+  };
+  if (SECRETS[rubrique].length) {
+    const valeur = {};
+    SECRETS[rubrique].forEach(k => { valeur[k] = v[k] || ''; });
+    const vide = Object.values(valeur).every(x => !x);
+    if (!vide && !cleCoffre) return 'Le coffre s’est refermé : rouvre-le et recommence.';
+    o.secret = vide ? '' : await chiffrer(cleCoffre, o.id, valeur);
+    if (o.secret) clairs.set(o.id, { secret: o.secret, v: valeur }); else clairs.delete(o.id);
+  }
+  const liste = d.coffre = coffre();
+  const i = liste.findIndex(x => x.id === o.id);
+  if (i >= 0) liste[i] = o; else liste.push(o);
+  rendre();
+  sauver('Coffre', o);
+}
+
+function fenetreFiche(f, rubrique) {
+  rubrique = f ? f.rubrique : rubrique;
+  const val = f ? (clair(f) || {}) : {};
+  const champs = {
+    codes: [
+      { k: 'titre', label: 'Nom', valeur: f ? f.titre : '', obligatoire: true, aide: 'Ex. Wi-Fi maison, alarme, portail, cadenas du vélo.' },
+      { k: 'code', label: 'Code (chiffré)', type: 'brut', valeur: val.code, copier: true },
+      { k: 'note', label: 'Note (visible sans ouvrir le coffre)', valeur: f ? f.note : '' }
+    ],
+    comptes: [
+      { k: 'titre', label: 'Nom', valeur: f ? f.titre : '', obligatoire: true, aide: 'Ex. Banque Populaire, MAIF, Ameli, Free.' },
+      { k: 'groupe', label: 'Catégorie', type: 'liste', valeur: f ? f.groupe : '', options: CATS_COMPTES },
+      { k: 'identifiant', label: 'Identifiant, n° client ou de contrat', type: 'brut', valeur: f ? f.identifiant : '', copier: true },
+      { k: 'mdp', label: 'Mot de passe (chiffré)', type: 'brut', valeur: val.mdp, copier: true },
+      { k: 'lien', label: 'Site', type: 'lien', valeur: f ? f.lien : '' },
+      { k: 'plus', label: 'Infos secrètes (chiffrées)', type: 'brut', valeur: val.plus, aide: 'Code PIN, question secrète, n° de carte d’accès…' },
+      { k: 'note', label: 'Note (visible sans ouvrir le coffre)', valeur: f ? f.note : '' }
+    ],
+    documents: [
+      { k: 'titre', label: 'Document', valeur: f ? f.titre : '', obligatoire: true, aide: 'Ex. Acte de vente, carte grise, livret de famille.' },
+      { k: 'groupe', label: 'Thème', type: 'liste', valeur: f ? f.groupe : '', options: THEMES_DOCS },
+      { k: 'lien', label: 'Lien Drive', type: 'lien', valeur: f ? f.lien : '', aide: 'Dans l’app Drive : ⋯ sur le document → Copier le lien.' },
+      { k: 'note', label: 'Où le trouver', valeur: f ? f.note : '', aide: 'Ex. Drive › Maison › Achat 2023, ou « classeur bleu, bureau ».' }
+    ]
+  }[rubrique];
+  const nouveau = { codes: 'Nouveau code', comptes: 'Nouveau compte', documents: 'Nouveau document' }[rubrique];
+  ouvrir({
+    titre: f ? f.titre : nouveau,
+    coffre: rubrique !== 'documents',
+    champs,
+    verifier: v => v.lien && !lienSur(v.lien) ? 'Le lien doit commencer par https://' : '',
+    validerAsync: v => sauverCoffre(f, rubrique, v),
+    supprimer: f ? () => {
+      if (!confirm('Supprimer « ' + f.titre + ' » ?')) return;
+      d.coffre = coffre().filter(x => x.id !== f.id);
+      clairs.delete(f.id);
+      rendre();
+      effacer('Coffre', f.id);
+    } : null
+  });
+}
+
+// --- Écrans ---
+
+function etatCoffre() {
+  if (!d.coffreCle) return `<div class="carte coffre-etat">${icone('cadenas', 1.5)}
+      <h4>Le coffre n’a pas encore de phrase secrète</h4>
+      <p>Elle sert à chiffrer les codes et les mots de passe sur l’iPhone, avant leur envoi : le Sheet ne voit qu’un texte illisible.</p>
+      <button class="bouton principal" data-action="c-ouvrir">Créer la phrase secrète</button></div>`;
+  return cleCoffre
+    ? `<div class="cloture coffre-bandeau">${icone('cadenasOuvert', 1.8)}<span>Coffre ouvert · se referme après 5 min sans activité</span><button class="lien" data-action="c-fermer">Fermer</button></div>`
+    : `<div class="cloture coffre-bandeau">${icone('cadenas', 1.8)}<span>Coffre fermé</span><button class="lien" data-action="c-ouvrir">Ouvrir</button></div>`;
+}
+/** Ce qui s'affiche à droite d'une ligne : la valeur (coffre ouvert) ou des points. */
+function valeurSecrete(f, k, montrer) {
+  if (!f.secret) return '';
+  if (!cleCoffre) return '<span class="secret-val masque">••••</span>';
+  const v = clair(f);
+  if (v === undefined) return '<span class="secret-val masque">…</span>';
+  if (v === null) return '<span class="secret-val illisible">illisible</span>';
+  if (!v[k]) return '';
+  return montrer ? `<span class="secret-val">${esc(v[k])}</span>` : '<span class="secret-val masque">••••••</span>';
+}
+const boutonCopier = (f, k) => cleCoffre && f.secret && clair(f) && clair(f)[k]
+  ? `<button class="copier" data-action="c-copier" data-id="${f.id}" data-k="${k}" aria-label="Copier">${icone('copier')}</button>` : '';
+const champRecherche = cle => `<input class="recherche" type="search" data-recherche="${cle}" placeholder="Rechercher…"
+    value="${esc(rechercheCoffre[cle])}" autocomplete="off" autocorrect="off" enterkeyhint="search" aria-label="Rechercher">`;
+const texteRecherche = f => normaliser([f.titre, f.groupe, f.identifiant, f.note].join(' '));
+/** Regroupe par catégorie, dans l'ordre proposé puis les autres. */
+function parGroupe(items, ordre, defaut) {
+  const groupes = {};
+  items.forEach(f => { const g = f.groupe || defaut; (groupes[g] = groupes[g] || []).push(f); });
+  return Object.keys(groupes).sort((a, b) => {
+    const ia = ordre.indexOf(a), ib = ordre.indexOf(b);
+    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || a.localeCompare(b, 'fr');
+  }).map(g => [g, groupes[g].sort(parNom)]);
+}
+
+function vueCodes() {
+  const items = coffre().filter(f => f.rubrique === 'codes').sort(parNom);
+  return `${etatCoffre()}
+    <section class="bloc"><h3>Codes</h3><div class="liste">
+      ${items.map(f => `<div class="ligne"><button class="corps" data-action="c-fiche" data-id="${f.id}">
+          <span class="nom long">${esc(f.titre)}${f.note ? `<small>${esc(f.note)}</small>` : ''}</span>${valeurSecrete(f, 'code', true)}</button>${boutonCopier(f, 'code')}</div>`).join('')
+        || '<p class="vide">Wi-Fi, alarme, portail… Ajoute ton premier code.</p>'}
+      <button class="ajouter" data-action="c-ajout" data-v="codes">+ Ajouter un code</button></div></section>
+    ${cleCoffre ? '<div class="actions-bas"><button class="lien" data-action="c-phrase">Changer la phrase secrète</button></div>' : ''}`;
+}
+
+function vueComptes() {
+  const items = coffre().filter(f => f.rubrique === 'comptes');
+  return `${etatCoffre()}
+    ${items.length > 5 ? champRecherche('comptes') : ''}
+    ${parGroupe(items, CATS_COMPTES, 'Autre').map(([g, liste]) => `<section class="bloc"><h3>${esc(g)}</h3><div class="liste">
+      ${liste.map(f => `<div class="ligne" data-cherche="${esc(texteRecherche(f))}"><button class="corps" data-action="c-fiche" data-id="${f.id}">
+          <span class="nom long">${esc(f.titre)}${f.identifiant || f.note ? `<small>${esc([f.identifiant, f.note].filter(Boolean).join(' · '))}</small>` : ''}</span>
+          ${valeurSecrete(f, 'mdp', false)}</button>${boutonCopier(f, 'mdp')}</div>`).join('')}</div></section>`).join('')
+      || '<p class="vide">Banque, assurances, énergie, administrations… Ajoute ton premier compte.</p>'}
+    <div class="liste" style="margin-bottom:28px"><button class="ajouter" data-action="c-ajout" data-v="comptes">+ Ajouter un compte</button></div>
+    ${cleCoffre ? '<div class="actions-bas"><button class="lien" data-action="c-phrase">Changer la phrase secrète</button></div>' : ''}`;
+}
+
+function vueDocuments() {
+  const items = coffre().filter(f => f.rubrique === 'documents'), modif = edition.has('documents');
+  const ligne = f => {
+    const contenu = `<span class="nom long">${esc(f.titre)}${f.note ? `<small>${esc(f.note)}</small>` : ''}</span>`;
+    if (modif || !lienSur(f.lien)) {
+      return `<div class="ligne" data-cherche="${esc(texteRecherche(f))}"><button class="corps" data-action="c-fiche" data-id="${f.id}">${contenu}
+        <span class="crayon">${icone('crayon', 1.8)}</span></button></div>`;
+    }
+    return `<div class="ligne" data-cherche="${esc(texteRecherche(f))}"><a class="corps" href="${esc(f.lien.trim())}" target="_blank" rel="noopener noreferrer">${contenu}
+      <span class="ouvre-lien">${icone('ouvrir', 1.8)}</span></a></div>`;
+  };
+  return `${items.length > 5 ? champRecherche('documents') : ''}
+    ${items.length ? '' : '<p class="aide intro">Pour chaque document : un nom, où le trouver, et le lien Drive (dans l’app Drive : ⋯ → Copier le lien). Un toucher l’ouvre dans Drive.</p>'}
+    ${parGroupe(items, THEMES_DOCS, 'Autre').map(([g, liste], i) => `<section class="bloc"><h3>${esc(g)}${i === 0 ? ' ' + boutonModifier('documents') : ''}</h3><div class="liste">
+      ${liste.map(ligne).join('')}</div></section>`).join('')}
+    <div class="liste" style="margin-bottom:28px"><button class="ajouter" data-action="c-ajout" data-v="documents">+ Ajouter un document</button></div>`;
+}
+
+/** Recherche : on masque les lignes (sans tout redessiner, pour garder le clavier ouvert). */
+function filtrerCoffre() {
+  const champ = document.querySelector('#vue .recherche');
+  const q = champ ? normaliser(champ.value) : '';
+  document.querySelectorAll('#vue .ligne[data-cherche]').forEach(l => { l.hidden = !!q && l.dataset.cherche.indexOf(q) < 0; });
+  document.querySelectorAll('#vue section.bloc').forEach(s => {
+    const lignes = s.querySelectorAll('.ligne[data-cherche]');
+    if (lignes.length) s.hidden = [...lignes].every(l => l.hidden);
+  });
+}
+document.addEventListener('input', e => {
+  if (!e.target.classList.contains('recherche')) return;
+  rechercheCoffre[e.target.dataset.recherche] = e.target.value;
+  filtrerCoffre();
+});
+
+/** Clics propres au Coffre ; renvoie true si le clic a été traité. */
+function clicCoffre(b) {
+  const id = b.dataset.id, f = id ? coffre().find(x => x.id === id) : null;
+  switch (b.dataset.action) {
+    case 'c-ouvrir': ouvrirCoffre(); return true;
+    case 'c-fermer': verrouiller(); return true;
+    case 'c-phrase': fenetreChangerPhrase(); return true;
+    case 'c-ajout': {
+      const r = b.dataset.v;
+      r === 'documents' ? fenetreFiche(null, r) : ouvrirCoffre(() => fenetreFiche(null, r));
+      return true;
+    }
+    case 'c-fiche':
+      if (!f) return true;
+      f.rubrique === 'documents' ? fenetreFiche(f) : ouvrirCoffre(() => fenetreFiche(f));
+      return true;
+    case 'c-copier': { const v = f && clair(f); if (v) copier(v[b.dataset.k]); return true; }
+    case 'c-copier-champ': { const el = formulaire.elements[b.dataset.k]; if (el) copier(el.value); return true; }
   }
   return false;
 }
@@ -1669,7 +2132,7 @@ function clicFamille(b) {
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-action]');
   if (!b || b.disabled) return;
-  if (clicFamille(b)) return;
+  if (clicFamille(b) || clicCoffre(b)) return;
   const id = b.dataset.id, trouve = (liste) => liste.find(x => x.id === id);
   switch (b.dataset.action) {
     case 'onglet': ongletParZone[zone] = b.dataset.k; rendre(); window.scrollTo(0, 0); break;
