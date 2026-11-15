@@ -121,7 +121,7 @@
   /* En-tête en verre, qui se fond dans le fond de la page (pas de bord net) */
   header.haut {
     position: sticky; top: 0; z-index: 5; margin: 0 -18px; text-align: center;
-    padding: calc(12px + env(safe-area-inset-top)) 18px 10px;
+    padding: calc(4px + env(safe-area-inset-top)) 18px 4px;
   }
   header.haut::before {
     content: ""; position: absolute; left: 0; right: 0; top: 0; bottom: -26px; z-index: -1; pointer-events: none;
@@ -131,11 +131,16 @@
     mask-image: linear-gradient(to bottom, #000 0%, #000 50%, transparent 100%);
   }
   header.haut h1 { font-size: 15.5px; font-weight: 600; margin: 0; letter-spacing: -.01em; }
+  /* État à droite, centré sur la hauteur du titre : flèche qui tourne pendant la mise à jour, ou « Réessayer » */
   #etat {
-    position: absolute; right: 18px; bottom: 12px; font-size: 11.5px; color: var(--discret);
-    border: 0; background: none; padding: 0;
+    position: absolute; right: 12px; bottom: 4px; height: 32px; min-width: 32px; padding: 0 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11.5px; color: var(--discret); border: 0; background: none;
   }
+  #etat:empty { display: none; }
+  #etat svg { width: 17px; height: 17px; color: var(--accent); stroke-width: 1.8; animation: tourne .9s linear infinite; }
   #etat.reessayer { color: var(--accent); font-weight: 600; }
+  @keyframes tourne { to { transform: rotate(360deg); } }
 
   /* Barre d'onglets flottante, fine */
   nav.onglets {
@@ -321,7 +326,7 @@
   /* Titre de l'en-tête : sélecteur d'espace */
   .titre-zone {
     border: 0; background: none; font: inherit; color: inherit; letter-spacing: inherit;
-    display: inline-flex; align-items: center; gap: 3px; padding: 6px 10px 6px 14px; border-radius: 999px; min-height: 36px;
+    display: inline-flex; align-items: center; gap: 3px; padding: 4px 10px 4px 14px; border-radius: 999px; min-height: 32px;
   }
   .titre-zone svg { width: 15px; height: 15px; color: var(--accent); transition: transform .35s cubic-bezier(.2,.85,.25,1), color .4s; }
   .titre-zone[aria-expanded="true"] svg { transform: rotate(180deg); }
@@ -390,6 +395,7 @@
   }
   .ajout-rapide input:focus { outline: 2px solid var(--accent-pastel); outline-offset: -1px; }
   .ajout-rapide .bouton { width: 46px; padding: 0; font-size: 20px; font-weight: 400; }
+  .ligne.facultatif .nom { font-style: italic; }
   .pastille { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--fait); }
   .pastille.ok { background: #a9d4bf; }
   .pastille.bientot { background: #e6c25e; }
@@ -542,7 +548,7 @@
     .boutons .danger { width: 100%; order: 3; text-align: center; padding-left: 16px; }
   }
   @keyframes monte { from { transform: translateY(40px); opacity: .4; } to { transform: none; opacity: 1; } }
-  @media (prefers-reduced-motion: reduce) { .zones-panneau, .zones-fond, body::before, body::after { transition: none; } dialog[open] { animation: none; } nav.onglets button, nav.onglets button svg { transition: none; } }
+  @media (prefers-reduced-motion: reduce) { .zones-panneau, .zones-fond, body::before, body::after { transition: none; } dialog[open] { animation: none; } #etat svg { animation-duration: 3s; } nav.onglets button, nav.onglets button svg { transition: none; } }
 </style>
 </head>
 <body>
@@ -654,7 +660,9 @@ function serveur(action, args) {
 }
 function majEtat() {
   const e = document.getElementById('etat');
-  e.textContent = enCours ? 'Mise à jour…' : avis;
+  if (enCours) e.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 11-2.34-5.66"/><path d="M20 4v4.5h-4.5"/></svg>';
+  else e.textContent = avis;
+  e.setAttribute('aria-label', enCours ? 'Mise à jour' : avis);
   e.disabled = !!enCours || !avis;
   e.classList.toggle('reessayer', !enCours && !!avis);
 }
@@ -1513,7 +1521,7 @@ const ORDRE_ENFANTS = ['Roman', 'Paloma'];                         // Roman à g
 const rangEnfant = e => { const i = ORDRE_ENFANTS.indexOf(e); return i < 0 ? 99 : i; };
 /** Texte comparable (sans accents ni majuscules), pour repérer les doublons. */
 const normaliser = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
-const CATS_ECHEANCES = ['Entretien', 'Santé', 'Papiers', 'Anniversaires'];
+const CATS_ECHEANCES = ['Entretien', 'Santé', 'Papiers'];   // les anniversaires ont été retirés (lignes gardées dans le Sheet)
 const gens = () => [...new Set(d.personnes.concat(d.enfants))];
 
 /** Ajoute ou modifie un élément de l'espace Famille (affichage immédiat, puis enregistrement). */
@@ -1541,7 +1549,7 @@ const puces = (liste, actif, action) => `<div class="puces">${liste.map(([v, t])
 /** Ligne d'une liste à cocher. En mode « Modifier », un toucher ouvre la fiche au lieu de cocher. */
 function ligneCochable(it, module, detail) {
   const modif = edition.has(module);
-  return `<div class="ligne ${it.coche ? 'passee' : ''}">
+  return `<div class="ligne ${it.coche ? 'passee' : ''} ${module === 'depart' && it.option ? 'facultatif' : ''}">
     <button class="corps" data-action="${modif ? 'f-item' : 'f-cocher'}" data-id="${it.id}" aria-pressed="${!!it.coche}">
       ${modif ? '' : `<span class="coche">${icone('coche', 3)}</span>`}
       <span class="nom">${esc(it.titre)}${detail ? `<small>${detail}</small>` : ''}</span>
@@ -1553,8 +1561,8 @@ const boutonModifier = module => `<button class="lien" data-action="f-edition" d
 /** Fiche d'un élément de liste (Départ, Courses, Tâches). */
 function fenetreItem(it, module, defauts) {
   const champs = [{ k: 'titre', label: module === 'courses' ? 'Article' : module === 'taches' ? 'Tâche' : 'Article', valeur: it ? it.titre : '', obligatoire: true }];
-  if (module === 'depart') champs.push({ k: 'option', label: 'Seulement si besoin', type: 'case', valeur: it ? it.option : false,
-    aide: 'Ne compte pas pour « Tout est prêt » (ex. médicaments).' });
+  if (module === 'depart') champs.push({ k: 'option', label: 'Pas forcément nécessaire (en italique)', type: 'case', valeur: it ? it.option : false,
+    aide: 'Ex. médicaments. Ne compte pas pour « Tout est prêt ».' });
   if (module === 'taches') champs.push(
     { k: 'qui', label: 'Qui s’en occupe', type: 'choix', valeur: it ? it.qui : '', options: [['', 'Tout le monde']].concat(d.personnes.map(p => [p, p])) },
     { k: 'date', label: 'Pour le (facultatif)', type: 'date', valeur: it ? it.date : '' });
@@ -1587,7 +1595,7 @@ function vueDepart() {
   const choixListes = `<div class="puces listes-depart">${puceListe('Matin')}${puceListe('Soir')}<span class="sep-puces" aria-hidden="true"></span>`
     + listes.slice(2).map(puceListe).join('') + '</div>';
   const items = fam().filter(f => f.module === 'depart' && f.groupe === departEnfant && f.liste === departListe).sort(parOrdre);
-  const utiles = items.filter(i => !i.option), siBesoin = items.filter(i => i.option);
+  const utiles = items.filter(i => !i.option);   // les lignes en italique ne comptent pas dans le compteur
   const faits = utiles.filter(i => i.coche).length;
   const pret = utiles.length > 0 && faits === utiles.length;
   return `<div class="segment">${enfants.map(e => `<button class="${e === departEnfant ? 'actif' : ''}" data-action="f-enfant" data-v="${esc(e)}">${esc(e)}</button>`).join('')}</div>
@@ -1598,9 +1606,8 @@ function vueDepart() {
     </div>
     ${pret ? `<div class="cloture">${icone('coche', 2)}<span>Tout est prêt pour ${esc(departEnfant)} !</span></div>` : ''}
     <section class="bloc"><h3>À prendre ${boutonModifier('depart')}</h3><div class="liste pointage">
-      ${utiles.map(i => ligneCochable(i, 'depart', i.note ? esc(i.note) : '')).join('') || '<p class="vide">Liste vide.</p>'}
+      ${items.map(i => ligneCochable(i, 'depart', i.note ? esc(i.note) : '')).join('') || '<p class="vide">Liste vide.</p>'}
       <button class="ajouter" data-action="f-ajout" data-v="depart">+ Ajouter</button></div></section>
-    ${siBesoin.length ? bloc('Si besoin', siBesoin.map(i => ligneCochable(i, 'depart', i.note ? esc(i.note) : '')).join(''), 'pointage') : ''}
     <div class="actions-bas"><button class="bouton" data-action="f-nouveau-depart">Nouveau départ</button></div>`;
 }
 
@@ -1634,7 +1641,7 @@ function vueTaches() {
       <div class="actions-bas"><button class="bouton" data-action="f-retirer" data-v="taches">Retirer les tâches faites</button></div>` : ''}`;
 }
 
-// ====== Onglet Échéances (entretien, santé, papiers, anniversaires) ======
+// ====== Onglet Échéances (entretien, santé, papiers) ======
 
 const aujourdhuiDate = () => new Date(aujourdhuiIso() + 'T12:00');
 function ajouterMoisDate(iso, n) {
@@ -1643,25 +1650,15 @@ function ajouterMoisDate(iso, n) {
   dt.setDate(Math.min(j, new Date(dt.getFullYear(), dt.getMonth() + 1, 0).getDate()));
   return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
 }
-/** Prochaine date d'une échéance (anniversaire : prochaine occurrence) et nombre de jours d'ici là. */
+/** Prochaine date d'une échéance et nombre de jours d'ici là. */
 function prochaine(it) {
   if (!it.date) return null;
-  let iso = it.date;
-  if (it.groupe === 'Anniversaires') {
-    const t = aujourdhuiDate(), [, m, j] = it.date.split('-');
-    iso = t.getFullYear() + '-' + m + '-' + j;
-    if (new Date(iso + 'T12:00') < t) iso = (t.getFullYear() + 1) + '-' + m + '-' + j;
-  }
+  const iso = it.date;
   return { iso, jours: Math.round((new Date(iso + 'T12:00') - aujourdhuiDate()) / 86400000) };
 }
 function libelleEcheance(it, p) {
   if (!p) return { texte: 'date à renseigner', etat: 'sans' };
   const quand = p.jours === 0 ? 'aujourd’hui' : p.jours === 1 ? 'demain' : p.jours < 0 ? 'en retard de ' + (-p.jours) + ' j' : 'dans ' + p.jours + ' j';
-  if (it.groupe === 'Anniversaires') {
-    const an = Number(it.date.slice(0, 4)), age = an > 1900 ? Number(p.iso.slice(0, 4)) - an : null;
-    return { texte: (age ? age + ' ans le ' : 'le ') + new Date(p.iso + 'T12:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) + ' · ' + quand,
-      etat: p.jours <= 14 ? 'bientot' : 'ok' };
-  }
   return { texte: dateCourte(p.iso) + ' · ' + quand, etat: p.jours < 0 ? 'retard' : p.jours <= 30 ? 'bientot' : 'ok' };
 }
 
@@ -1672,7 +1669,7 @@ function vueEcheances() {
   return `${puces(CATS_ECHEANCES.map(c => [c, c]), echeCat, 'f-cat-eche')}
     <div class="liste">${items.map(({ it, p }) => {
       const l = libelleEcheance(it, p);
-      const sous = [it.qui, it.periode && it.groupe !== 'Anniversaires' ? 'tous les ' + it.periode + ' mois' : '', it.note ? esc(it.note) : ''].filter(Boolean).join(' · ');
+      const sous = [it.qui, it.periode ? 'tous les ' + it.periode + ' mois' : '', it.note ? esc(it.note) : ''].filter(Boolean).join(' · ');
       return `<div class="ligne"><button class="corps" data-action="f-echeance" data-id="${it.id}">
         <span class="pastille ${l.etat}"></span>
         <span class="nom long">${esc(it.titre)}${sous ? `<small>${sous}</small>` : ''}</span>
@@ -1682,17 +1679,16 @@ function vueEcheances() {
 }
 
 function fenetreEcheance(it) {
-  const anniv = (it ? it.groupe : echeCat) === 'Anniversaires';
-  const periodique = it && it.periode && !anniv;
+  const periodique = it && it.periode;
   ouvrir({
     titre: it ? it.titre : 'Nouveau · ' + echeCat,
     champs: [
-      { k: 'titre', label: anniv ? 'Prénom' : 'Intitulé', valeur: it ? it.titre : '', obligatoire: true },
-      { k: 'date', label: anniv ? 'Date de naissance' : 'Prochaine échéance', type: 'date', valeur: it ? it.date : '' },
-    ].concat(anniv ? [] : [
+      { k: 'titre', label: 'Intitulé', valeur: it ? it.titre : '', obligatoire: true },
+      { k: 'date', label: 'Prochaine échéance', type: 'date', valeur: it ? it.date : '' },
       { k: 'periode', label: 'À refaire tous les (mois)', type: 'nombre', valeur: it ? it.periode : null, vide: 'une seule fois' },
-      { k: 'qui', label: 'Pour qui', type: 'choix', valeur: it ? it.qui : '', options: [['', '—']].concat(gens().map(p => [p, p])) }
-    ]).concat([{ k: 'note', label: 'Note', valeur: it ? it.note : '' }]),
+      { k: 'qui', label: 'Pour qui', type: 'choix', valeur: it ? it.qui : '', options: [['', '—']].concat(gens().map(p => [p, p])) },
+      { k: 'note', label: 'Note', valeur: it ? it.note : '' }
+    ],
     supprimer: it ? () => effacerFamille(it) : null,
     action2: periodique ? { libelle: 'Fait aujourd’hui', fn: () =>
       sauverFamille(Object.assign({}, it, { date: ajouterMoisDate(aujourdhuiIso(), it.periode) })) } : null,
